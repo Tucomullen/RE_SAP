@@ -1,0 +1,26 @@
+# Environment and secrets
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# Node / Python artifacts
+node_modules/
+__pycache__/
+*.pyc
+dist/
+build/
+
+# Logs
+*.log
+logs/
