@@ -6,7 +6,21 @@
       "Bash(node -e \":*)",
       "Bash(node:*)",
       "Bash(grep -A2 \"^trigger:\" c:/Users/xlgarcia/projects/RE_SAP/.kiro/hooks/*.yaml)",
-      "Bash(grep \"action.type\\\\|type: agent\\\\|type: agentPrompt\" c:/Users/xlgarcia/projects/RE_SAP/.kiro/hooks/*.yaml)"
+      "Bash(grep \"action.type\\\\|type: agent\\\\|type: agentPrompt\" c:/Users/xlgarcia/projects/RE_SAP/.kiro/hooks/*.yaml)",
+      "Bash(ls -1 /c/Users/xlgarcia/projects/RE_SAP/*.md /c/Users/xlgarcia/projects/RE_SAP/.gitignore)",
+      "Bash(claude mcp:*)",
+      "Bash(where claude:*)",
+      "Read(//usr/local/bin/**)",
+      "Read(//c/Users/xlgarcia/projects/RE_SAP/$APPDATA/npm/**)",
+      "Bash(gcloud auth:*)",
+      "Bash(npm install:*)",
+      "Bash(gcloud version:*)",
+      "Bash(CLOUDSDK_PYTHON=\"/c/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud version)",
+      "Bash(CLOUDSDK_PYTHON=\"/c/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth application-default print-access-token)",
+      "Bash(CLOUDSDK_PYTHON=\"/c/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth list)",
+      "Bash(CLOUDSDK_PYTHON=\"/c/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud config list project)",
+      "Bash(CLOUDSDK_PYTHON=\"/c/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth application-default set-quota-project northern-syntax-483410-v6)",
+      "Bash(CLOUDSDK_PYTHON=\"/c/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud services enable stitch.googleapis.com --project=northern-syntax-483410-v6)"
     ]
   }
 }
