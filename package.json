@@ -1,0 +1,17 @@
+{
+  "name": "re-sap-tools",
+  "version": "1.0.0",
+  "description": "MCP proxy servers for RE-SAP IFRS 16 addon tooling",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "stitch": "node tools/stitch-proxy.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "google-auth-library": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

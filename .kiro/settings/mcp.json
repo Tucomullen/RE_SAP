@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "stitch": {
+      "command": "node",
+      "args": ["tools/stitch-proxy.mjs"],
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
