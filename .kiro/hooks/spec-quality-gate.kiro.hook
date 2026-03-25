@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "spec-quality-gate",
+  "description": "Validate spec files on save for structural completeness, acceptance criteria quality, traceability, and cross-spec consistency",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "specs/**/requirements.md",
+      "specs/**/design.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A spec file was just saved: {{file}}\n\nPerform these quality checks:\n\n1. STRUCTURE\n   Confirm the version header table is present and all major sections exist\n   for this file type. For requirements.md: epics and stories tables.\n   For design.md: pattern sections with traceability footers.\n\n2. ACCEPTANCE CRITERIA (requirements.md only)\n   For each user story row (US-X.X format), verify:\n   - An acceptance criterion exists and is non-empty.\n   - At least one criterion uses Given/When/Then format.\n   Flag any story that is missing these.\n\n3. TRACEABILITY (design.md only)\n   Check that each design section references the US-ID(s) it implements.\n   Flag any section with no traceability back to a requirement.\n\n4. CROSS-SPEC CONSISTENCY\n   Check for obvious contradictions with the companion spec files\n   (requirements.md, design.md, tasks.md). Examples: a design pattern\n   with no matching requirement, a requirement with no design coverage,\n   a task referencing a feature not in requirements.\n\nOutput only concrete findings with specific section references.\nIf no issues are found, output exactly: \"Spec quality check passed - no issues found.\"\nDo not elaborate beyond that one line when everything is clean."
+  },
+  "workspaceFolderName": "RE_SAP",
+  "shortName": "spec-quality-gate"
+}

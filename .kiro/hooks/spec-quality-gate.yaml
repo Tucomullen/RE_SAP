@@ -1,14 +1,12 @@
 name: spec-quality-gate
-description: >
-  Validate requirements.md and design.md for structural completeness, acceptance
-  criteria quality, traceability footers, and cross-spec consistency.
-trigger:
-  type: fileSave
-  filePattern:
+description: Validate spec files on save for structural completeness, acceptance criteria quality, traceability, and cross-spec consistency
+when:
+  type: fileEdited
+  patterns:
     - "specs/**/requirements.md"
     - "specs/**/design.md"
-action:
-  type: agentPrompt
+then:
+  type: askAgent
   prompt: |
     A spec file was just saved: {{file}}
 

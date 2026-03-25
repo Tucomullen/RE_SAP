@@ -1,12 +1,9 @@
 name: controlled-closure-check
-description: >
-  After a spec task execution completes, enforce the five-point closure gate:
-  spec currency, docs updated, governance checked, QA recorded, next action stated.
-  Primary trigger: postTaskExecution. Fallback: fileSave on tasks.md (see HOOKS_SETUP.md).
-trigger:
+description: Enforce five-point closure gate after spec task execution
+when:
   type: postTaskExecution
-action:
-  type: agentPrompt
+then:
+  type: askAgent
   prompt: |
     A spec task was just executed and marked complete.
     Task: {{task.id}} - {{task.title}}

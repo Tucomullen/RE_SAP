@@ -1,11 +1,9 @@
 name: session-governance-check
-description: >
-  After each agent session, scan for new risks, assumptions, dependencies, TBC items,
-  and reusable knowledge that should be preserved in the governance registers or knowledge base.
-trigger:
+description: Scan agent sessions for governance register items and reusable knowledge
+when:
   type: agentStop
-action:
-  type: agentPrompt
+then:
+  type: askAgent
   prompt: |
     Review the work completed in this agent session. Perform two focused checks.
 

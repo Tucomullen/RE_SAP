@@ -1,14 +1,12 @@
 name: spec-documentation-guard
-description: >
-  When a technical or governance document is saved, check whether the functional,
-  technical, or user master docs need corresponding updates to maintain alignment.
-trigger:
-  type: fileSave
-  filePattern:
+description: Check cross-doc alignment when technical or governance docs are saved
+when:
+  type: fileEdited
+  patterns:
     - "docs/technical/**/*.md"
     - "docs/governance/**/*.md"
-action:
-  type: agentPrompt
+then:
+  type: askAgent
   prompt: |
     A technical or governance document was just saved: {{file}}
 

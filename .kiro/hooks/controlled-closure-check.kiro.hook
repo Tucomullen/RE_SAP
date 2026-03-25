@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "controlled-closure-check",
+  "description": "Enforce five-point closure gate after spec task execution",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A spec task was just executed and marked complete.\nTask: {{task.id}} - {{task.title}}\n\nEnforce the closure gate by verifying all five criteria:\n\n1. SPEC\n   Is the relevant section of specs/000-master-ifrs16-addon/requirements.md\n   current? Does the acceptance criteria still match what was delivered?\n\n2. DOCS\n   Have the relevant master docs been updated?\n   Identify which applies (functional, technical, user) and confirm\n   the section reflects the completed work.\n\n3. GOVERNANCE\n   Have docs/governance/risk-register.md and\n   docs/governance/assumptions-register.md been checked for any\n   new items introduced or items closed by this task?\n\n4. QA\n   Have QA or acceptance evidence expectations been identified\n   and recorded for this task (in the spec or a QA artifact)?\n\n5. NEXT ACTION\n   Is a next action or explicit closure rationale stated in the\n   task row or a linked document?\n\nFor each criterion not met, state exactly what is missing and which\nfile must be updated before this task is treated as closed.\n\nIf all five criteria are met, output exactly:\n\"Closure gate passed - all criteria met for {{task.id}}.\""
+  }
+}
