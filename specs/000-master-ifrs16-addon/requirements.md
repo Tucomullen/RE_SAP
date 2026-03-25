@@ -214,13 +214,4 @@ See full risk register including pain-point-derived risks R-13 to R-22: [docs/go
 
 ---
 
-## 8. Dependencies
 
-| ID | Dependency | Type | Blocks |
-|----|-----------|------|--------|
-| D-01 | IFRS 16 accounting policy document approved by IFRS 16 Accountant | External | Epic 2, Epic 3, Epic 4 |
-| D-02 | SAP RE-FX blueprint — field mapping confirmed | External | Epic 1, Epic 3 |
-| D-03 | IBR/discount rate process established | External | Epic 3, Epic 4 |
-| D-04 | Transport landscape and package naming confirmed | Internal | All technical development |
-| D-05 | Data governance/AI service approval | External | Epic 7 |
-| D-06 | FI-AA and FI-GL posting approach confirmed | External | Epic 5 |

@@ -1,0 +1,40 @@
+name: session-governance-check
+description: Scan agent sessions for governance register items and reusable knowledge
+when:
+  type: agentStop
+then:
+  type: askAgent
+  prompt: |
+    Review the work completed in this agent session. Perform two focused checks.
+
+    PART 1 - GOVERNANCE REGISTERS
+    Identify any new or changed items:
+    - RISKS: New threats, worsened or mitigated risks from this session
+    - ASSUMPTIONS: New assumptions made, or existing assumptions invalidated
+    - DEPENDENCIES: New upstream or downstream dependencies introduced
+    - TBC ITEMS: Open questions requiring external validation (accounting, SAP, governance)
+
+    For each item found, state exactly what needs to be added or updated in:
+    - docs/governance/risk-register.md
+    - docs/governance/assumptions-register.md
+    Reference the specific section or existing entry ID.
+
+    PART 2 - KNOWLEDGE CAPTURE
+    Determine whether reusable knowledge was produced, for example:
+    - An IFRS 16 interpretation confirmed or refined
+    - SAP RE-FX behavior or object logic documented
+    - A project decision that should be preserved as an ADR
+    - A UX pattern or flow designed and validated
+    - User feedback or pain-point evidence (PP-A through PP-M)
+
+    If reusable knowledge was produced, recommend the exact target path:
+    - knowledge/official-ifrs/       IFRS 16 standard interpretations
+    - knowledge/project-decisions/   ADRs and confirmed design choices
+    - knowledge/sap-functional/      SAP RE-FX process and object documentation
+    - knowledge/ux-stitch/           UX patterns and flow artifacts
+    - knowledge/user-feedback/       Pain-point evidence and UAT findings
+
+    Also note if a new knowledge file requires its folder README.md index to be updated.
+
+    If no governance items and no reusable knowledge were produced, say so in one sentence and stop.
+    Be specific. No generic advice.

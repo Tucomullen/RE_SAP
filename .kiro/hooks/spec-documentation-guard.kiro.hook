@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "spec-documentation-guard",
+  "description": "Check cross-doc alignment when technical/governance docs are saved",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "docs/technical/**/*.md",
+      "docs/governance/**/*.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A technical or governance document was just saved: {{file}}\n\nDetermine whether this change has cross-doc implications. For example:\n- A technical design change that affects functional behavior or user workflow\n- A governance decision (ADR, risk entry, assumption) that invalidates a current doc section\n\nIf cross-doc impact exists, identify exactly which companion document needs updating:\n- docs/functional/master-functional-design.md  if a functional pattern or behavior changed\n- docs/technical/master-technical-design.md    if another technical section references this change\n- docs/user/master-user-manual.md              if a user-visible workflow or explanation changed\n\nFor each affected document, state the specific section and the required update.\nIf no companion document needs updating, confirm that in one sentence.\nDo not summarize the file content. Only flag actionable cross-doc gaps."
+  }
+}

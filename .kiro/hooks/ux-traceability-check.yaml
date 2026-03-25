@@ -1,0 +1,33 @@
+name: ux-traceability-check
+description: Verify UX traceability across functional docs, user docs, and pain-point matrix
+when:
+  type: fileEdited
+  patterns:
+    - "docs/functional/**/*.md"
+    - "docs/user/**/*.md"
+    - "knowledge/ux-stitch/**/*.md"
+    - "PAIN_POINTS_TRACEABILITY.md"
+then:
+  type: askAgent
+  prompt: |
+    A UX-related or documentation file was just saved: {{file}}
+
+    Determine whether this change affects user-facing behavior, guided flows, help content,
+    validation messages, or pain-point mitigation (PP-A through PP-M).
+
+    If it does, verify traceability is coherent across all four documents:
+    1. docs/functional/master-functional-design.md
+       Is the functional design pattern for this area still current?
+    2. docs/user/master-user-manual.md
+       Does the user guidance reflect the change?
+    3. knowledge/ux-stitch/README.md
+       Are the UX artifact linked-requirement fields still valid?
+    4. PAIN_POINTS_TRACEABILITY.md
+       Are the Epic/Story/Design/Tasks columns for the relevant PP-IDs still accurate?
+
+    If a mismatch, missing cross-reference, or uncovered PP-ID is detected,
+    state exactly which file and section needs updating.
+
+    If the change does not affect UX traceability, or if everything is consistent, output:
+    "UX traceability consistent - no update needed."
+    Do not elaborate beyond that single line when no action is required.
