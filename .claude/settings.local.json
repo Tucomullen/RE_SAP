@@ -20,7 +20,9 @@
       "Bash(CLOUDSDK_PYTHON=\"/c/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth list)",
       "Bash(CLOUDSDK_PYTHON=\"/c/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud config list project)",
       "Bash(CLOUDSDK_PYTHON=\"/c/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth application-default set-quota-project northern-syntax-483410-v6)",
-      "Bash(CLOUDSDK_PYTHON=\"/c/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud services enable stitch.googleapis.com --project=northern-syntax-483410-v6)"
+      "Bash(CLOUDSDK_PYTHON=\"/c/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud services enable stitch.googleapis.com --project=northern-syntax-483410-v6)",
+      "Bash(grep -E \"\\(design/stitch|\\\\.kiro|knowledge|specs|tools\\)$\")",
+      "Bash(ls -la /c/Users/xlgarcia/projects/RE_SAP/*.md /c/Users/xlgarcia/projects/RE_SAP/*.json)"
     ]
   }
 }

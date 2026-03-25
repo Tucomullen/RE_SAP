@@ -1,19 +1,20 @@
 {
   "enabled": true,
   "name": "ux-traceability-check",
-  "description": "Verify UX traceability across functional, user docs, and pain-point matrix",
-  "version": "1",
+  "description": "Verify UX traceability across functional, user docs, design/stitch exports, and pain-point matrix",
+  "version": "2",
   "when": {
     "type": "fileEdited",
     "patterns": [
       "docs/functional/**/*.md",
       "docs/user/**/*.md",
       "knowledge/ux-stitch/**/*.md",
+      "design/stitch/**/*.md",
       "PAIN_POINTS_TRACEABILITY.md"
     ]
   },
   "then": {
     "type": "askAgent",
-    "prompt": "A UX-related or documentation file was just saved: {{file}}\n\nDetermine whether this change affects user-facing behavior, guided flows, help content,\nvalidation messages, or pain-point mitigation (PP-A through PP-M).\n\nIf it does, verify traceability is coherent across all four documents:\n1. docs/functional/master-functional-design.md\n   Is the functional design pattern for this area still current?\n2. docs/user/master-user-manual.md\n   Does the user guidance reflect the change?\n3. knowledge/ux-stitch/README.md\n   Are the UX artifact linked-requirement fields still valid?\n4. PAIN_POINTS_TRACEABILITY.md\n   Are the Epic/Story/Design/Tasks columns for the relevant PP-IDs still accurate?\n\nIf a mismatch, missing cross-reference, or uncovered PP-ID is detected,\nstate exactly which file and section needs updating.\n\nIf the change does not affect UX traceability, or if everything is consistent, output:\n\"UX traceability consistent - no update needed.\"\nDo not elaborate beyond that single line when no action is required."
+    "prompt": "A UX-related or documentation file was just saved: {{file}}\n\nDetermine whether this change affects user-facing behavior, guided flows, help content,\nvalidation messages, or pain-point mitigation (PP-A through PP-M).\n\nIf the file is under design/stitch/exports/<screen-name>/, also check:\n- Is the traceability.md for this screen up to date?\n- Does the screen's metadata.json status field reflect the current state?\n- If screen.html was updated, has the ui5-fiori-bridge agent been notified?\n\nIf it does affect traceability, verify coherence across all four documents:\n1. docs/functional/master-functional-design.md\n   Is the functional design pattern for this area still current?\n2. docs/user/master-user-manual.md\n   Does the user guidance reflect the change?\n3. knowledge/ux-stitch/README.md\n   Are the UX artifact linked-requirement fields still valid?\n4. PAIN_POINTS_TRACEABILITY.md\n   Are the Epic/Story/Design/Tasks columns for the relevant PP-IDs still accurate?\n\nIf a mismatch, missing cross-reference, or uncovered PP-ID is detected,\nstate exactly which file and section needs updating.\n\nIf the change does not affect UX traceability, or if everything is consistent, output:\n\"UX traceability consistent - no update needed.\"\nDo not elaborate beyond that single line when no action is required."
   }
 }

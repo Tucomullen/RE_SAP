@@ -1,11 +1,12 @@
 name: ux-traceability-check
-description: Verify UX traceability across functional docs, user docs, and pain-point matrix
+description: Verify UX traceability across functional docs, user docs, design/stitch exports, and pain-point matrix
 when:
   type: fileEdited
   patterns:
     - "docs/functional/**/*.md"
     - "docs/user/**/*.md"
     - "knowledge/ux-stitch/**/*.md"
+    - "design/stitch/**/*.md"
     - "PAIN_POINTS_TRACEABILITY.md"
 then:
   type: askAgent
@@ -15,7 +16,12 @@ then:
     Determine whether this change affects user-facing behavior, guided flows, help content,
     validation messages, or pain-point mitigation (PP-A through PP-M).
 
-    If it does, verify traceability is coherent across all four documents:
+    If the file is under design/stitch/exports/<screen-name>/, also check:
+    - Is the traceability.md for this screen up to date?
+    - Does the screen's metadata.json status field reflect the current state?
+    - If screen.html was updated, has the ui5-fiori-bridge agent been notified?
+
+    If it does affect traceability, verify coherence across all four documents:
     1. docs/functional/master-functional-design.md
        Is the functional design pattern for this area still current?
     2. docs/user/master-user-manual.md
