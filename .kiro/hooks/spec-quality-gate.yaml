@@ -1,0 +1,40 @@
+name: spec-quality-gate
+description: >
+  Validate requirements.md and design.md for structural completeness, acceptance
+  criteria quality, traceability footers, and cross-spec consistency.
+trigger:
+  type: fileSave
+  filePattern:
+    - "specs/**/requirements.md"
+    - "specs/**/design.md"
+action:
+  type: agentPrompt
+  prompt: |
+    A spec file was just saved: {{file}}
+
+    Perform these quality checks:
+
+    1. STRUCTURE
+       Confirm the version header table is present and all major sections exist
+       for this file type. For requirements.md: epics and stories tables.
+       For design.md: pattern sections with traceability footers.
+
+    2. ACCEPTANCE CRITERIA (requirements.md only)
+       For each user story row (US-X.X format), verify:
+       - An acceptance criterion exists and is non-empty.
+       - At least one criterion uses Given/When/Then format.
+       Flag any story that is missing these.
+
+    3. TRACEABILITY (design.md only)
+       Check that each design section references the US-ID(s) it implements.
+       Flag any section with no traceability back to a requirement.
+
+    4. CROSS-SPEC CONSISTENCY
+       Check for obvious contradictions with the companion spec files
+       (requirements.md, design.md, tasks.md). Examples: a design pattern
+       with no matching requirement, a requirement with no design coverage,
+       a task referencing a feature not in requirements.
+
+    Output only concrete findings with specific section references.
+    If no issues are found, output exactly: "Spec quality check passed - no issues found."
+    Do not elaborate beyond that one line when everything is clean.

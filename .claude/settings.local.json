@@ -4,7 +4,9 @@
       "Bash(git checkout:*)",
       "Bash(pwsh --version)",
       "Bash(node -e \":*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(grep -A2 \"^trigger:\" c:/Users/xlgarcia/projects/RE_SAP/.kiro/hooks/*.yaml)",
+      "Bash(grep \"action.type\\\\|type: agent\\\\|type: agentPrompt\" c:/Users/xlgarcia/projects/RE_SAP/.kiro/hooks/*.yaml)"
     ]
   }
 }
