@@ -3,13 +3,39 @@
 **Priority Level:** 7 (authoritative for UI/UX decisions)
 **Location:** `knowledge/ux-stitch/`
 **Managed by:** UX/Stitch Agent + UX Designer (content)
+**Last updated:** 2026-03-25
 
 ---
 
 ## Purpose
-This folder stores UI/UX design artifacts for the IFRS 16 Z addon. When the Google Stitch MCP server is activated, the `ux-stitch` agent will feed artifacts directly into this folder. Until then, designs are added manually as exports, screenshots, or structured descriptions.
+
+Este folder almacena artefactos UI/UX **validados** para el add-on IFRS 16.
+
+> **Regla crítica:** Solo llegan aquí artefactos que han completado el flujo completo:
+> generación en Stitch → revisión del agente ux-stitch → validación de persona representative.
+>
+> La fuente de trabajo (en progreso) está en `design/stitch/exports/<screen-name>/`.
+> No mover artefactos a este folder sin validación explícita.
 
 Designs in this folder are authoritative for UI implementation decisions but are not authoritative for accounting or SAP technical behavior.
+
+---
+
+## Fuente principal para implementación UI5/Fiori
+
+Los artefactos validados que se almacenan aquí provienen siempre del export real de Stitch.
+
+**Precedencia de fuentes (para cualquier pantalla en este folder):**
+
+| Prioridad | Fuente | Rol |
+|-----------|--------|-----|
+| 1 | `screen.html` | **FUENTE PRINCIPAL** — jerarquía visual, layout, componentes, acciones |
+| 2 | `screenshot.png` | **VALIDACIÓN VISUAL** — confirma fidelidad del HTML |
+| 3 | `metadata.json` / `screen.json` | **CONTEXTO ESTRUCTURAL** — design system, versión, IDs |
+| 4 | `source-prompt.md` | **SOLO TRAZABILIDAD** — no rediseñar desde aquí si HTML existe |
+
+Los artefactos validados se mueven desde `design/stitch/exports/<screen-name>/` con los mismos archivos,
+añadiendo el frontmatter de validación requerido.
 
 ---
 
@@ -17,40 +43,45 @@ Designs in this folder are authoritative for UI implementation decisions but are
 
 | Artifact Type | Description | Format |
 |---------------|-------------|--------|
-| Screen designs | Full screen layouts from Stitch | PNG export or Markdown description |
-| Component specifications | Reusable UI components (form fields, wizards, status displays) | Markdown with field tables |
-| User flow diagrams | Navigation flows between screens | Mermaid flowchart or PNG |
-| Interaction specifications | Button behaviors, validation messages, conditional displays | Markdown |
-| MCP-exported artifacts | Raw Stitch design exports when MCP is active | To be determined on activation |
+| Screen HTML export | HTML real exportado desde Google Stitch, revisado y validado | `screen.html` |
+| Screenshot | Imagen PNG del canvas de Stitch | `screenshot.png` |
+| Metadata | Metadatos del export (design system, versión, IDs) | `metadata.json` |
+| Full export JSON | JSON completo de Stitch si disponible | `screen.json` |
+| Source prompt | Prompt original (trazabilidad únicamente) | `source-prompt.md` |
+| Traceability | Links a specs, pain points, user stories | `traceability.md` |
+| Component specifications | Especificaciones reutilizables UI (forms, wizards, status displays) | Markdown con tablas |
 
 ---
 
-## MCP Integration (Future)
-When the Google Stitch MCP server is configured:
-- The `ux-stitch` agent will read designs directly from Stitch projects.
-- Designs will be extracted as structured component specifications and stored here.
-- Every MCP-fed artifact will be treated as untrusted input until validated by the UX designer and a target persona user.
-- MCP activation procedure: see `.kiro/agents/ux-stitch.json` for configuration notes.
+## MCP Integration — Estado actual
 
-**Current status:** MCP server not installed. [TO BE CONFIRMED — when activated, update this README.]
+- MCP infrastructure **validada** 2026-03-25 (proxy, auth ADC, registro en .kiro/settings/mcp.json).
+- Workflow A (manual via Stitch web UI) es completamente operativo.
+- Workflow B (MCP generation via Kiro) requiere que el usuario complete ADC setup.
+  Ver `design/stitch/README.md` sección 2 para instrucciones exactas.
+- Todo contenido de Stitch MCP se trata como entrada no confiable hasta validación. Ver `.kiro/steering/ai-governance.md`.
 
 ---
 
 ## Required Frontmatter
 
+Cada artefacto validado en este folder debe tener este frontmatter:
+
 ```yaml
 ---
 source-type: ux-stitch
-source-name: [Screen or component name, e.g., "Contract Intake Wizard — Step 2: Options"]
+source-name: [Screen or component name, e.g., "Lease Contract Overview"]
 source-date: YYYY-MM-DD
-source-version: [Design version, e.g., "v0.2"]
+source-version: [Design version, e.g., "v0.1"]
 priority: 7
 confidence: [high | medium | draft]
 status: [current | draft | under-review | superseded]
-tags: [intake, wizard, options, status-display, etc.]
+tags: [lease, overview, amortization-schedule, etc.]
 user-story-ref: [US-X.X from requirements.md]
 persona: [P1 | P2 | P3 — which persona this design serves]
 pain-point-ref: [Which pain point from knowledge/user-feedback/ this addresses]
+export-html: [path to screen.html]
+export-screenshot: [path to screenshot.png]
 cited-in: []
 added-by: [UX designer name or agent]
 added-date: YYYY-MM-DD
@@ -64,24 +95,31 @@ validation-date: YYYY-MM-DD
 ## Design-to-Implementation Lifecycle
 
 ```
-1. Design created in Stitch (or described manually)
-2. Stored here with status: draft
-3. ux-stitch agent reviews against pain points and SAP constraints
-4. Issues flagged for UX designer
-5. Persona representative validates design
-6. Status → current when validated
-7. Implementation tasks generated from design
-8. Tasks added to specs/000-master-ifrs16-addon/tasks.md
-9. After implementation: design cited in docs/user/master-user-manual.md
+1. Design created in Stitch (Workflow A manual or Workflow B MCP)
+2. Export guardado en design/stitch/exports/<screen-name>/
+   → screen.html (FUENTE PRINCIPAL)
+   → screenshot.png (validación visual)
+   → metadata.json / screen.json
+   → source-prompt.md (trazabilidad)
+   → traceability.md
+3. Agente ux-stitch revisa contra pain points y SAP constraints
+4. Agente ui5-fiori-bridge traduce screen.html → SAP UI5 spec
+5. Issues flagged for UX designer
+6. Persona representative valida diseño
+7. Status → current cuando validado
+8. Artefacto movido a knowledge/ux-stitch/<screen-name>/ con frontmatter completo
+9. Tareas de implementación generadas
+10. Tasks added to specs/000-master-ifrs16-addon/tasks.md
+11. After implementation: design cited in docs/user/master-user-manual.md
 ```
 
 ---
 
 ## Index of Current Designs
 
-| File | Screen/Component | User Story | Persona | Status | Date |
-|------|-----------------|-----------|---------|--------|------|
-| *(To be populated as designs are created)* | | | | | |
+| Folder | Screen/Component | User Story | Persona | Status | Date |
+|--------|-----------------|-----------|---------|--------|------|
+| *(To be populated — first screen pending Stitch export)* | | | | | |
 
 ---
 

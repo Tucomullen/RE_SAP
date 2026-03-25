@@ -196,13 +196,41 @@ Status must never be inferred from other fields — it must always be an explici
 
 ## 12. Design Artifact Storage and Versioning
 
-- Prompts (inputs to Stitch): `design/stitch/prompts/`
-- Raw Stitch outputs and exports: `design/stitch/exports/`
-- Reviewed and annotated screens: `design/stitch/screens/`
-- Validated artifacts (approved for implementation): `knowledge/ux-stitch/`
-- Traceability per screen: `design/stitch/screens/TRACEABILITY_TEMPLATE.md` (one file per screen, instantiated from template)
+### Fuente principal para implementación UI5/Fiori
+
+> **La fuente principal para implementar cualquier pantalla es el artefacto real exportado por Stitch.**
+> El prompt original (`source-prompt.md`) existe únicamente para trazabilidad.
+> El agente `ui5-fiori-bridge` trabaja desde `screen.html`, no desde el prompt.
+
+### Precedencia de fuentes
+
+| Prioridad | Fuente | Rol |
+|-----------|--------|-----|
+| 1 | `screen.html` | **FUENTE PRINCIPAL** — jerarquía visual, layout, componentes, acciones |
+| 2 | `screenshot.png` | **VALIDACIÓN VISUAL** — confirma fidelidad del HTML |
+| 3 | `metadata.json` / `screen.json` | **CONTEXTO ESTRUCTURAL** — design system, versión, IDs |
+| 4 | `source-prompt.md` | **SOLO TRAZABILIDAD** — no rediseñar desde aquí si HTML existe |
+
+### Estructura de storage
+
+| Capa | Ubicación | Contenido |
+|------|-----------|-----------|
+| Prompts (inputs a Stitch) | `design/stitch/prompts/` | Prompts por pantalla — fuente de trazabilidad |
+| Exports estructurados por pantalla | `design/stitch/exports/<screen-name>/` | `screen.html`, `screenshot.png`, `metadata.json`, `screen.json`, `source-prompt.md`, `traceability.md`, `README.md` |
+| Exports legacy (formato anterior) | `design/stitch/exports/*.md` | Archivos planos del formato anterior — mantener como histórico |
+| Revisados y anotados | `design/stitch/screens/` | Traceability files anotados tras revisión del agente ux-stitch |
+| Artefactos validados | `knowledge/ux-stitch/` | Solo tras validación de persona representative |
+
+Cada pantalla tiene su carpeta en `design/stitch/exports/<screen-name>/` con todos sus artefactos.
+El estándar completo de la carpeta está en `design/stitch/README.md` sección 5.
 
 Every file in `design/stitch/screens/` and `knowledge/ux-stitch/` must carry the frontmatter defined in `knowledge/ux-stitch/README.md`.
+
+### Agentes del flujo
+
+- `ux-stitch` — Genera pantallas, revisa contra pain points y SAP constraints.
+- `ui5-fiori-bridge` — Traduce `screen.html` → spec SAP UI5 (XML View, controller, i18n, bindings).
+- Método de traducción: `design/stitch/html-to-ui5-method.md`.
 
 ---
 

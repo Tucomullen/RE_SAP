@@ -2,40 +2,57 @@
 
 **Last updated:** 2026-03-25
 **Owner:** UX Designer + Kiro ux-stitch agent
-**Related files:** `design/stitch/DESIGN.md`, `.kiro/agents/ux-stitch.json`, `knowledge/ux-stitch/README.md`
+**Related files:** `design/stitch/DESIGN.md`, `.kiro/agents/ux-stitch.json`, `.kiro/agents/ui5-fiori-bridge.json`, `knowledge/ux-stitch/README.md`
 
-> **Connection status:** Stitch MCP is **operational** as of 2026-03-25.
+> **Connection status:** MCP infrastructure **validated and registered** as of 2026-03-25.
 > Auth: Google Cloud ADC via `tools/stitch-proxy.mjs` (forwarding proxy, `google-auth-library`).
-> First screen generated: `design/stitch/exports/finance-dashboard-v0.1-2026-03-25.md`.
-> GCP project: `northern-syntax-483410-v6` (re-sap-ifrs16, project ID: 8885202212425441682).
+> Workflow A (manual) is fully operational.
+> Workflow B (MCP via Kiro) requires completing ADC authentication setup (see section 2).
+> First screen generated: `design/stitch/exports/finance-dashboard-v0.1-2026-03-25.md` (legacy flat format).
 
 ---
 
-## 1. What this integration does
+## 1. Flujo actual y fuente de implementación
 
-This folder (`design/stitch/`) is the working layer for UI screen design generation using Google Stitch.
+> **Principio fundamental:** La fuente principal para implementación UI5/Fiori es el artefacto real
+> exportado por Stitch. El prompt original existe solo para trazabilidad, no como fuente de trabajo.
 
-**Architecture:** Kiro connects to the Google Stitch MCP server via a **local stdio ADC proxy** (`tools/stitch-proxy.mjs`). Configuration is in `.kiro/settings/mcp.json`.
+### Flujo completo
 
 ```
-specs/ (functional truth)
-    ↓  UX designer or ux-stitch agent reads requirements
-design/stitch/prompts/  (prompt layer)
-    ↓  [Manual path] Prompt pasted into Stitch web UI manually
-    ↓  [MCP path — OPERATIONAL] Prompt sent via MCP (Kiro → stitch-proxy.mjs → stitch.googleapis.com/mcp)
-Google Stitch  (design generation)
-    ↓  Generated screen exported
-design/stitch/exports/  (raw output)
-    ↓  ux-stitch agent reviews against pain points + SAP constraints
-design/stitch/screens/  (reviewed + annotated)
-    ↓  Validated by persona representative
-knowledge/ux-stitch/  (validated artifacts — authoritative)
-    ↓  Implementation tasks generated
+specs/ (verdad funcional)
+    ↓  El diseñador UX o el agente ux-stitch lee los requisitos
+design/stitch/prompts/  (capa de prompt — trazabilidad)
+    ↓  [Workflow A] Prompt pegado manualmente en Stitch web UI
+    ↓  [Workflow B — MCP] Prompt enviado vía MCP (Kiro → stitch-proxy.mjs → stitch.googleapis.com/mcp)
+Google Stitch  (generación de pantalla)
+    ↓  Pantalla generada, exportada como HTML + screenshot + JSON
+design/stitch/exports/<screen-name>/  ← NUEVO ESTÁNDAR (carpeta por pantalla)
+    ↓  screen.html ← FUENTE PRINCIPAL para ui5-fiori-bridge
+    ↓  screenshot.png ← validación visual
+    ↓  metadata.json / screen.json ← contexto estructural
+    ↓  source-prompt.md ← solo trazabilidad
+    ↓  traceability.md ← links a specs, pain points
+    ↓  El agente ux-stitch revisa contra SAP constraints + pain points
+    ↓  El agente ui5-fiori-bridge traduce HTML → SAP UI5 spec
+design/stitch/screens/  (revisados y anotados)
+    ↓  Validado por representante de persona
+knowledge/ux-stitch/  (artefactos validados — autoritativos)
+    ↓  Tareas de implementación generadas
 specs/000-master-ifrs16-addon/tasks.md
 ```
 
-The boundary between `design/stitch/` (working) and `knowledge/ux-stitch/` (validated) is intentional.
-Do not move artifacts to `knowledge/ux-stitch/` without validation.
+### Precedencia de fuentes (para implementación UI5)
+
+| Prioridad | Fuente | Rol |
+|-----------|--------|-----|
+| 1 | `screen.html` | **FUENTE PRINCIPAL** — layout, jerarquía, componentes, acciones |
+| 2 | `screenshot.png` | **VALIDACIÓN VISUAL** — confirma fidelidad del HTML |
+| 3 | `metadata.json` / `screen.json` | **CONTEXTO ESTRUCTURAL** — design system, versión, IDs |
+| 4 | `source-prompt.md` | **SOLO TRAZABILIDAD** — no rediseñar desde aquí si HTML existe |
+
+El límite entre `design/stitch/` (trabajo) y `knowledge/ux-stitch/` (validado) es intencional.
+No mover artefactos a `knowledge/ux-stitch/` sin validación de persona.
 
 ---
 
@@ -51,9 +68,8 @@ Do not move artifacts to `knowledge/ux-stitch/` without validation.
 - Conclusion: `tools/call` requires OAuth 2 principal credentials, not an API key
 
 ### Primary path — Google Cloud Application Default Credentials (ADC)
-This is the approach to implement before the MCP path is operational.
 
-**Pending manual steps:**
+**Pending manual steps (required for Workflow B):**
 
 1. **Install Google Cloud CLI (`gcloud`)**
    Download: https://cloud.google.com/sdk/docs/install
@@ -74,7 +90,6 @@ This is the approach to implement before the MCP path is operational.
    ```bash
    gcloud services enable stitch.googleapis.com --project=<your-gcp-project-id>
    ```
-   Or via GCP Console → APIs & Services → Enable APIs.
 
 5. **Verify that ADC is usable**
    ```bash
@@ -83,18 +98,11 @@ This is the approach to implement before the MCP path is operational.
    If this returns a token, ADC is working.
 
 6. **Update `tools/stitch-proxy.mjs`** to use ADC for real calls, replacing the STITCH_API_KEY guard.
-   This step requires confirming the exact auth header format Stitch expects from ADC.
    Do not mark this as done until a real `tools/call` succeeds.
 
 ### `STITCH_API_KEY` — retained only as mock guard
-The `.env` variable `STITCH_API_KEY` is still required by `tools/stitch-proxy.mjs` as an env-presence check
-(it mirrors the guard that a real implementation would have for a production credential).
+The `.env` variable `STITCH_API_KEY` is still required by `tools/stitch-proxy.mjs` as an env-presence check.
 It is **not** a working auth mechanism for the real Stitch MCP.
-**Do not advertise it as such.**
-
-### .env.example
-A safe template (no real keys) is at `.env.example` at the repository root.
-The `STITCH_API_KEY` entry there is for the mock guard only.
 
 ---
 
@@ -124,13 +132,7 @@ Kiro reads `.kiro/settings/mcp.json` at workspace startup. **Current config:**
 - `gcloud auth application-default login` completed (ADC credentials in `~/.config/gcloud/`)
 - Quota project set: `gcloud auth application-default set-quota-project northern-syntax-483410-v6`
 
-**To verify Kiro loads the proxy:**
-Open Kiro → Settings → MCP Servers → `stitch` should appear as Connected.
-Real Stitch tool calls will execute against `re-sap-ifrs16` project (ID: `8885202212425441682`).
-
-### Known real Stitch MCP tools (confirmed from `tools/list` — NOT from executed tool call)
-These tool names were retrieved from `https://stitch.googleapis.com/mcp` via an unauthenticated `tools/list` call on 2026-03-25.
-They are confirmed as the real names exposed by the server, but have **not** been successfully invoked.
+### Known real Stitch MCP tools (confirmed from `tools/list` 2026-03-25)
 
 | Real tool name | Description (from server) |
 |----------------|--------------------------|
@@ -147,10 +149,6 @@ They are confirmed as the real names exposed by the server, but have **not** bee
 | `list_design_systems` | Lists design systems for a project |
 | `apply_design_system` | Applies a design system to screens |
 
-> **Note:** The local mock uses different names (`stitch_generate_screen`, etc.) — these are stubs
-> that predate the confirmed real tool names. The mock names do not match production.
-> Update the mock if/when it is used for integration testing against the real API.
-
 ---
 
 ## 4. How to use prompts in design/stitch/prompts/
@@ -159,49 +157,69 @@ They are confirmed as the real names exposed by the server, but have **not** bee
 1. Open the prompt file (e.g., [lease-contract-overview.md](prompts/lease-contract-overview.md)).
 2. Copy the prompt section starting at `## Prompt`.
 3. Paste into Google Stitch's generation input.
-4. Export the result and save to [design/stitch/exports/](exports/).
-5. Create a traceability file in [design/stitch/screens/](screens/) from the template.
+4. Export the result following the new folder standard (see section 5).
+5. Save `screen.html`, `screenshot.png`, `metadata.json`, `screen.json` in the screen's folder.
+6. `source-prompt.md` in the folder is for traceability — the exported HTML is the implementation source.
 
-### Workflow B — Via MCP (ux-stitch agent in Kiro) — NOT YET OPERATIONAL
-> Requires ADC auth setup (section 2) and switch to real endpoint. Do not attempt until DQ-01 resolved.
+### Workflow B — Via MCP (ux-stitch agent in Kiro)
+> Requires ADC auth setup (section 2). Confirm Kiro shows `stitch` as Connected before attempting.
 
 1. Complete all steps in section 2 (gcloud ADC setup).
-2. Update `.kiro/settings/mcp.json` to use the real endpoint (see section 3).
-3. Confirm Kiro shows `stitch` as Connected (Settings → MCP Servers).
-4. Open the `ux-stitch` agent in Kiro.
-5. Ask the agent to generate the screen:
+2. Confirm Kiro shows `stitch` as Connected (Settings → MCP Servers).
+3. Open the `ux-stitch` agent in Kiro.
+4. Ask the agent to generate the screen:
    ```
    Generate the Lease Contract Overview screen using the prompt in
    design/stitch/prompts/lease-contract-overview.md.
-   Stitch project ID: <your-gcp-project-id>
+   Stitch project ID: 8885202212425441682
    ```
-6. The agent will call `generate_screen_from_text` via MCP — Kiro will prompt for approval (autoApprove is empty).
-7. After generation, retrieve the screen via `get_screen` → save to `design/stitch/exports/`.
-8. Review the output and annotate in `design/stitch/screens/`.
-
-### Creating a new prompt
-1. Identify the target screen and its linked user story in `specs/`.
-2. Read `design/stitch/DESIGN.md` — all prompts must be consistent with it.
-3. Copy an existing prompt file as a starting point.
-4. Fill in all sections (see `lease-contract-overview.md` for structure).
-5. Name the file: `<kebab-case-screen-name>.md`.
+5. The agent will call `generate_screen_from_text` via MCP.
+6. After generation, retrieve the screen via `get_screen` → save to `design/stitch/exports/<screen-name>/screen.html`.
+7. Save screenshot and JSON. Populate `metadata.json`.
 
 ---
 
-## 5. Where to save exports, screens, and traceability
+## 5. Estándar de export por pantalla (nuevo — obligatorio)
 
-| Artifact | Location | When |
-|----------|----------|------|
-| Raw Stitch output (JSON/PNG/Markdown) | `design/stitch/exports/` | Immediately after generation |
-| Reviewed and annotated screen | `design/stitch/screens/` | After ux-stitch agent review |
-| Traceability record | `design/stitch/screens/<screen-name>-traceability.md` | One per screen, instantiated from `TRACEABILITY_TEMPLATE.md` |
-| Validated artifact | `knowledge/ux-stitch/` | After persona representative validation — with full frontmatter |
+Cada pantalla generada por Stitch tiene su propia carpeta en `design/stitch/exports/`.
 
-File naming convention for exports:
+### Estructura de carpeta
+
 ```
-design/stitch/exports/<screen-name>-v<version>-<date>.<ext>
-Example: lease-contract-overview-v0.1-2026-03-25.md
+design/stitch/exports/<screen-name>/
+  screen.html          ← FUENTE PRINCIPAL para implementación UI5/Fiori
+  screenshot.png       ← Validación visual (confirma fidelidad del HTML)
+  metadata.json        ← Metadatos estructurales (design system, versión, IDs)
+  screen.json          ← Export JSON completo de Stitch (si disponible)
+  source-prompt.md     ← SOLO TRAZABILIDAD — no implementar desde aquí si HTML existe
+  traceability.md      ← Links a specs, user stories, pain points
+  README.md            ← Estado de la carpeta e instrucciones
 ```
+
+### Reglas del estándar
+
+- **`screen.html` es la fuente principal.** Si existe con contenido real, el agente `ui5-fiori-bridge` trabaja desde él.
+- **`source-prompt.md` es solo trazabilidad.** No rediseñar desde el prompt si el HTML está disponible.
+- **Si un archivo no puede obtenerse automáticamente**, dejar placeholder honesto con instrucción exacta de cómo completarlo.
+- **No inventar artefactos.** Si Stitch no ha generado la pantalla aún, los archivos son placeholders documentados.
+- **El agente `ui5-fiori-bridge` trabaja desde esta carpeta.** Ver `.kiro/agents/ui5-fiori-bridge.json` y `design/stitch/html-to-ui5-method.md`.
+
+### Pantallas con carpeta creada
+
+| Pantalla | Carpeta | Estado HTML | Estado |
+|----------|---------|-------------|--------|
+| Lease Contract Overview | [exports/lease-contract-overview/](exports/lease-contract-overview/) | ⬜ Placeholder | Prompt listo — export pendiente |
+
+### Exports legacy (formato anterior)
+
+Los siguientes archivos son exports del formato anterior (archivo plano `.md`).
+Se mantienen como legado transitional. **No eliminar.**
+
+| Archivo | Estado |
+|---------|--------|
+| `exports/finance-dashboard-v0.1-2026-03-25.md` | Legacy — raw export, no revisado. Mantener como histórico. |
+
+Para migrar `finance-dashboard` al nuevo estándar: crear `exports/finance-dashboard/` y mover o referenciar el contenido. No borrar el `.md` original.
 
 ---
 
@@ -209,38 +227,54 @@ Example: lease-contract-overview-v0.1-2026-03-25.md
 
 | Limitation | Details |
 |-----------|---------|
-| **ADC token expiry** | ADC tokens expire in ~1h. `google-auth-library` handles refresh automatically via the stored credentials file. If the proxy fails auth, re-run `gcloud auth application-default login`. |
-| **`gcloud` requires Python** | On this Windows environment, `gcloud` works with its bundled Python. Use: `CLOUDSDK_PYTHON="$LOCALAPPDATA/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe" gcloud <cmd>`. |
-| **`autoApprove` is empty** | No stitch tools are auto-approved. Kiro will prompt for confirmation on every MCP call. Intentional — update only after confirming tool safety. |
-| **design/stitch vs knowledge/ux-stitch** | Do not confuse working artifacts (here) with validated artifacts (`knowledge/ux-stitch/`). Only artifacts with persona validation belong in `knowledge/ux-stitch/`. |
-| **Stitch generates generic designs** | Stitch output must be reviewed against SAP constraints and IFRS 16 pain points before use. See `ux-stitch` agent and `DESIGN.md`. |
+| **Workflow B (MCP) requiere ADC setup** | Infraestructura validada pero el usuario debe completar `gcloud auth application-default login` antes de usar el agente ux-stitch para generación via MCP. |
+| **screen.html no disponible para ninguna pantalla IFRS 16 aún** | Lease Contract Overview y demás pantallas tienen placeholders. El flujo HTML→UI5 no puede ejecutarse hasta el primer export real. |
+| **ADC token expiry** | ADC tokens expire in ~1h. `google-auth-library` handles refresh automatically. If the proxy fails auth, re-run `gcloud auth application-default login`. |
+| **`gcloud` requires Python** | On this Windows environment: `CLOUDSDK_PYTHON="$LOCALAPPDATA/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe" gcloud <cmd>`. |
+| **`autoApprove` is empty** | No stitch tools are auto-approved. Kiro will prompt for confirmation on every MCP call. Intentional. |
+| **DQ-02 open** | Fiori vs. WebDynpro scope not decided — afecta qué componentes UI5 son válidos. Ver `design/stitch/DESIGN.md` sección 13. |
 
 ---
 
-## 7. Recommended next steps
+## 7. Agentes relacionados
 
-### Step 1 — Verify Kiro loads the proxy ✅ Unblocked
-1. `npm install` at repo root ✅
-2. `gcloud auth application-default login` ✅
-3. `gcloud auth application-default set-quota-project northern-syntax-483410-v6` ✅
-4. Open Kiro → Settings → MCP Servers → confirm `stitch` appears as Connected
+| Agente | Archivo | Rol en este flujo |
+|--------|---------|-------------------|
+| `ux-stitch` | `.kiro/agents/ux-stitch.json` | Genera pantallas en Stitch, valida contra pain points y SAP constraints |
+| `ui5-fiori-bridge` | `.kiro/agents/ui5-fiori-bridge.json` | Traduce `screen.html` → spec SAP UI5 (XML View, controller, i18n, bindings) |
 
-### Step 2 — Run first design generation ✅ Done
-First screen generated: `design/stitch/exports/finance-dashboard-v0.1-2026-03-25.md`
-Stitch project: `re-sap-ifrs16` (ID: `8885202212425441682`)
+Método de traducción HTML→UI5: [design/stitch/html-to-ui5-method.md](html-to-ui5-method.md)
 
-### Step 3 — Generate IFRS 16 screens
-Use Workflow B (via MCP) with the real endpoint to generate the Lease Contract Overview screen.
-Prompt file is ready: `design/stitch/prompts/lease-contract-overview.md`.
-Tool to call: `generate_screen_from_text` (confirmed real name — see section 3).
+---
 
-### Step 4 — Connect specs to design
-For each Epic in `specs/000-master-ifrs16-addon/requirements.md` with UI interactions,
-create a corresponding prompt in `design/stitch/prompts/`.
-Priority order: Contract Intake Wizard, Period-End Trigger, Calculation Approval screen.
+## 8. Recommended next steps
 
-### Step 5 — Extend ux-traceability-check hook
-See `design/stitch/hooks-plan.md` — add `design/stitch/**/*.md` to the existing hook.
+### Step 1 — Completar ADC setup para Workflow B
+```bash
+gcloud auth application-default login
+gcloud auth application-default set-quota-project northern-syntax-483410-v6
+```
+Confirmar: Kiro → Settings → MCP Servers → `stitch` aparece como Connected.
 
-### Step 6 — Update knowledge/ux-stitch/README.md index
-Once the first validated screen exists in `knowledge/ux-stitch/`, update the index table.
+### Step 2 — Generar primera pantalla IFRS 16 real
+Usar el agente `ux-stitch` para generar Lease Contract Overview.
+Prompt listo: `design/stitch/prompts/lease-contract-overview.md`
+Carpeta de export lista con placeholders: `design/stitch/exports/lease-contract-overview/`
+Guardar: `screen.html`, `screenshot.png`, `metadata.json`, `screen.json`.
+
+### Step 3 — Ejecutar agente ui5-fiori-bridge
+Una vez que `screen.html` tenga contenido real, abrir el agente `ui5-fiori-bridge` en Kiro y proporcionar la ruta:
+```
+design/stitch/exports/lease-contract-overview/
+```
+El agente produce: XML View, controller responsibilities, i18n keys, data bindings, fidelity gaps.
+
+### Step 4 — Revisar y validar
+El agente `ux-stitch` revisa el output del bridge contra pain points y SAP constraints.
+Persona representative valida.
+Artefacto validado → `knowledge/ux-stitch/lease-contract-overview/`.
+
+### Step 5 — Ampliar la biblioteca de prompts
+Para cada Epic en `specs/000-master-ifrs16-addon/requirements.md` con interacciones UI,
+crear prompt en `design/stitch/prompts/`.
+Prioridad: Contract Intake Wizard, Period-End Trigger, Calculation Approval screen.

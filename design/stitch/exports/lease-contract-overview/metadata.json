@@ -1,0 +1,20 @@
+{
+  "_placeholder": true,
+  "_instructions": "Replace this file with the real metadata.json when the Stitch export is complete. See README.md for the required format.",
+  "screen_name": "Lease Contract Overview",
+  "screen_id": "PENDING — fill with Stitch screen ID after generation",
+  "stitch_project_id": "8885202212425441682",
+  "stitch_project_name": "re-sap-ifrs16",
+  "design_system": "PENDING — fill with design system name from Stitch",
+  "version": "0.1",
+  "generated_date": "PENDING",
+  "generated_by": "PENDING — Google Stitch MCP or Manual",
+  "prompt_file": "source-prompt.md",
+  "user_stories": ["US-1.2", "US-2.1"],
+  "personas": ["P1", "P2"],
+  "pain_points": ["PP-D", "PP-G", "PP-B"],
+  "status": "placeholder — no export yet",
+  "reviewed_by": null,
+  "review_date": null,
+  "notes": "Placeholder. Export has not been generated from Stitch yet. Follow instructions in README.md to generate and populate this file."
+}
