@@ -1,3 +1,9 @@
+---
+name: ifrs16-remeasurement
+description: >-
+  Analyze a remeasurement trigger or contract modification event, classify the IFRS 16 treatment, compute before/after impact, and produce workflow design and audit evidence requirements.
+---
+
 # Skill: IFRS 16 Remeasurement and Contract Modification Analysis
 
 ## Title

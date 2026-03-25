@@ -10,33 +10,27 @@
   ],
   "resources": [
     {
-      "type": "file",
-      "path": "AGENTS.md",
+      "uri": "file://AGENTS.md",
       "description": "Mandatory behavioral rules"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/ifrs16-domain.md",
+      "uri": "file://.kiro/steering/ifrs16-domain.md",
       "description": "IFRS 16 domain rules and mandatory human validation points"
     },
     {
-      "type": "file",
-      "path": "knowledge/official-ifrs/README.md",
+      "uri": "file://knowledge/official-ifrs/README.md",
       "description": "IFRS 16 knowledge base index"
     },
     {
-      "type": "file",
-      "path": "docs/governance/decision-log.md",
+      "uri": "file://docs/governance/decision-log.md",
       "description": "Approved project accounting decisions"
     },
     {
-      "type": "skill",
-      "path": ".kiro/skills/ifrs16-contract-analysis/SKILL.md",
+      "uri": "skill://.kiro/skills/ifrs16-contract-analysis/SKILL.md",
       "description": "Contract analysis skill"
     },
     {
-      "type": "skill",
-      "path": ".kiro/skills/ifrs16-remeasurement/SKILL.md",
+      "uri": "skill://.kiro/skills/ifrs16-remeasurement/SKILL.md",
       "description": "Remeasurement analysis skill"
     }
   ]

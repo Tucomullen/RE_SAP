@@ -1,3 +1,9 @@
+---
+name: technical-design-writer
+description: >-
+  Produce or update an ABAP technical design for an IFRS 16 addon component, covering data model, class and interface design, integration, logging, authorization, and transport strategy.
+---
+
 # Skill: Technical Design Writer
 
 ## Title

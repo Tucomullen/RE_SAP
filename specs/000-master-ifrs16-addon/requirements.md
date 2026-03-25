@@ -3,6 +3,7 @@
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 0.1 | 2026-03-24 | Bootstrap | Initial requirements baseline |
+| 0.2 | 2026-03-24 | Remediation | Added EPIC 10 (pain point mitigation), updated personas, added PP-driven ACs to existing epics, added risks R-13 to R-22 |
 
 ---
 
@@ -26,14 +27,15 @@ Organizations using SAP ECC RE/RE-FX for lease management lack a native, auditab
 
 ## 3. Personas
 
-| ID | Persona | Role | Key Goals | Key Pain Points |
-|----|---------|------|-----------|----------------|
-| P1 | Lease Accountant | Performs IFRS 16 measurements, approves calculations, handles modifications | Accurate calculations, fast close, audit-ready evidence | Manual burden, no traceability, rework on every modification |
-| P2 | RE Contract Manager | Creates and maintains RE-FX contracts | Efficient data entry, clear guidance on what is needed | Not knowing which data is IFRS 16-relevant, no system guidance |
-| P3 | Finance Controller | Approves postings, oversees compliance | Confidence in accuracy, visibility of status | Can't verify accuracy without deep review, no dashboard |
-| P4 | Internal/External Auditor | Reviews IFRS 16 compliance evidence | Complete, traceable evidence | Cannot trace calculation to source, no audit trail |
-| P5 | IT/ABAP Support | Maintains the addon | Clean architecture, good documentation | Undocumented customizations, no test coverage |
+| ID | Persona | Role | Key Goals | Key Pain Points (documented) |
+|----|---------|------|-----------|------------------------------|
+| P1 | Lease Accountant | Performs IFRS 16 measurements, approves calculations, handles modifications | Accurate calculations, fast close, audit-ready evidence | PP-B (retroactive postings), PP-C (ZRE009 failures), PP-E (missing valuation), PP-F (unexplained movements), PP-G (no contract-level amortization), PP-H (broken old contracts) |
+| P2 | RE Contract Manager | Creates and maintains RE-FX contracts | Efficient data entry, clear guidance on what is needed | PP-A (configuration errors), PP-L (date mismatches), PP-J (extension/rescission sequence), PP-K (advance payment rules), PP-D (contract visibility) |
+| P3 | Finance Controller | Approves postings, oversees compliance | Confidence in accuracy, visibility of status | PP-F (unexplained special movements), PP-I (foreign currency interpretation), PP-G (aggregate amortization gaps), PP-C (period-end blocking errors) |
+| P4 | Internal/External Auditor | Reviews IFRS 16 compliance evidence | Complete, traceable evidence | PP-F (unexplained movements), PP-B (retroactive postings without explanation), PP-G (amortization not traceable by contract) |
+| P5 | IT/ABAP Support | Maintains the addon | Clean architecture, good documentation | PP-H (upgrade impact management), PP-K (country-specific rules needing config) |
 | P6 | Project Governance Lead | Owns project delivery | Risk visibility, decision traceability | Scattered decisions, no single governance view |
+| P7 | Local Finance User (e.g. Poland) | Executes country-specific IFRS 16 processes | Process works for local contract types | PP-K (advance payment case), PP-I (foreign currency), PP-M (manual in wrong language) |
 
 ---
 
@@ -141,6 +143,31 @@ Organizations using SAP ECC RE/RE-FX for lease management lack a native, auditab
 
 ---
 
+### EPIC 10: Operational Error Prevention and User Explainability
+**Goal:** Directly address the 13 documented operational pain points through validation,
+guided workflows, explainability features, and upgraded documentation. This epic cuts
+across all other epics — it defines the quality bar for every user-facing feature.
+
+**Background:** Pain points PP-A through PP-M were documented from real SAP RE/IFRS 16
+operational experience. They reveal that the primary failure mode for users is not a lack
+of features but a lack of guidance, explainability, and proactive validation. See
+`PAIN_POINTS_TRACEABILITY.md` and `knowledge/user-feedback/` for full detail.
+
+| ID | Story | Acceptance Criteria | Pain Point |
+|----|-------|-------------------|------------|
+| US-10.1 | As a RE Contract Manager, I want the system to validate all IFRS 16-critical contract fields before saving, with plain-language error messages, so I can correct mistakes before they reach downstream processes. | Given a contract is being saved with incomplete or inconsistent IFRS 16 fields (dates, currency, object type, periodicity), When validation runs, Then the system displays field-specific plain-language error messages — not SAP message codes. No contract may be sent to IFRS 16 calculation with validation errors outstanding. | PP-A, PP-L |
+| US-10.2 | As a Lease Accountant, I want the system to show me a plain-language explanation whenever a retroactive change generates a special posting, so I can reconcile it without specialist support. | Given a retroactive change triggers a special posting, When the posting is created, Then the system attaches a machine-generated explanation: what the posting is, why it exists, which contract event triggered it, and the IFRS 16 basis. Explanation visible from the FI document and from the Z audit transaction. | PP-B, PP-F |
+| US-10.3 | As a Lease Accountant, I want the system to check all ZRE009 prerequisites before I attempt reclassification, so I am never blocked by a preventable error. | Given the user initiates ZRE009 reclassification, When the pre-flight check runs, Then the system verifies: current period is posted, all changes are valuated, no pending asset movements. Each unmet condition is listed with a plain-language remediation instruction. ZRE009 is blocked until all prerequisites are met. | PP-C |
+| US-10.4 | As a RE Contract Manager, I want to see the lifecycle status of every contract in the contract list (Active / Rescinded / Exempt / Blocked), so I can filter to only operationally relevant contracts. | Given any contract list view in the Z addon, When the user applies a lifecycle status filter, Then contracts are filtered correctly. Rescinded contracts are visible but clearly labeled — not hidden. A filter preset for Active contracts is the default view. | PP-D |
+| US-10.5 | As a Lease Accountant, I want the system to block the period-end batch if any contract has unvaluated changes, and show me which contracts are affected, so I do not run the period with incorrect data. | Given the period-end batch is triggered, When the pre-flight check detects contracts with unvaluated changes, Then the batch is blocked. A list of affected contracts is displayed with a link to the valuation transaction for each. | PP-E |
+| US-10.6 | As a Lease Accountant, I want a contract-level amortization report that shows the full schedule for a single contract, so I can verify and follow up at the contract level. | Given any active lease contract, When the user opens the contract-level amortization view, Then the full amortization schedule is displayed: period, opening balance, interest, depreciation, payment, closing balance. Exportable to spreadsheet. | PP-G |
+| US-10.7 | As a Lease Accountant, I want the system to identify contracts affected by an upgrade data quality issue (clearing vs. expense differences) and guide me through the remediation steps, so I can fix them without specialist intervention. | Given an upgrade impact detection report is executed, When the report identifies contracts with clearing/expense differences, Then each affected contract is listed with the nature of the discrepancy and step-by-step remediation instructions. | PP-H |
+| US-10.8 | As a RE Contract Manager, I want the system to guide me through the correct sequence for executing a contract extension or rescission, with a status check before each step, so I cannot accidentally perform steps out of order. | Given a user initiates an extension or rescission workflow, When the guided workflow runs, Then the system enforces the mandatory sequence: execute extension/rescission → confirm → valuate → period-end. Each step checks that the previous step is complete before allowing the next. | PP-J |
+| US-10.9 | As a Local Finance User, I want the user manual to be available in my working language with guidance specific to my contract types (including advance payment contracts for Poland), so I can resolve operational questions without escalation. | Given a user accesses the user manual, When they select their language and country/region, Then the manual displays in the selected language with country-specific sections flagged. Poland advance payment guidance is present and current. | PP-K, PP-M |
+| US-10.10 | As a Finance Controller, I want to see a plain-language summary of any foreign currency contract balance including the exchange rate used and the calculation basis, so I can interpret the balance without accounting specialist support. | Given a foreign currency contract has been calculated, When the controller opens the contract balance view, Then the display includes: balance in contract currency, balance in company code currency, exchange rate used, rate source, and a plain-language note on multi-currency accounting treatment. | PP-I |
+
+---
+
 ## 5. Explicit Out-of-Scope List (Version 1)
 
 - Lessor accounting (IFRS 16 §61–97)
@@ -183,7 +210,7 @@ See full assumptions register: [docs/governance/assumptions-register.md](../../d
 | R-05 | S/4HANA migration timeline conflicts with addon investment | Low | High | Design for S/4 compatibility from the start; document all ECC-specific choices |
 | R-06 | Data governance blocks AI service integration | Medium | Medium | Engage Legal/DGO early; design AI layer to be optional |
 
-See full risk register: [docs/governance/risk-register.md](../../docs/governance/risk-register.md)
+See full risk register including pain-point-derived risks R-13 to R-22: [docs/governance/risk-register.md](../../docs/governance/risk-register.md)
 
 ---
 

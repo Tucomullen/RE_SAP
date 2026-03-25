@@ -34,15 +34,136 @@ Organizations using SAP RE/RE-FX for real estate management face a structural ga
 
 ---
 
-## User Pain Points in RE/IFRS16
+## Documented Operational Pain Points
 
-- **Data capture friction:** Lease-relevant data (commencement date, term, options, rates) is not systematically captured in RE contracts — users must hunt across documents.
-- **No decision guidance:** Users do not know when IFRS 16 applies, when exemptions apply, or how to classify a modification.
-- **Calculation opacity:** No system-generated schedule — users build Excel models independently.
-- **Remeasurement complexity:** Every option exercise, rate change, or modification requires a full recalculation with new discount rates — currently manual.
-- **Posting disconnection:** Calculated values are manually keyed into SAP FI — reconciliation errors are common.
-- **Disclosure pain:** Aggregating maturity analysis, weighted average discount rates, and lease liability movements requires cross-system data collection.
-- **No audit trail:** There is no system record of why a calculation was made a certain way, by whom, and when.
+The following pain points have been observed and documented by users operating SAP RE/IFRS 16
+processes. They are first-class product requirements — every epic and design decision must
+address at least one of them. See `PAIN_POINTS_TRACEABILITY.md` for the full traceability matrix.
+
+### PP-A: Contract Configuration Errors
+
+Users struggle to correctly configure key contract fields: start date, end date, description,
+currency, object type, and periodicity. Incorrect values cause silent errors in downstream
+valuation and FI posting runs. Users often do not discover the error until the process fails.
+
+Design response: Guided intake wizard with field-level validation in plain language, smart defaults
+from RE-FX contract data, and pre-flight validation before calculation is triggered.
+
+### PP-B: Retroactive Change Problems
+
+When users modify installments or business partners in already-closed fiscal periods, the system
+generates special postings that are difficult to interpret and reconcile. Users are surprised by
+these entries and cannot explain them.
+
+Design response: Change impact preview before saving, plain-language explanation of special posting
+type, and guided reconciliation report for period-end exceptions.
+
+### PP-C: Debt Reclassification Failures (ZRE009)
+
+Reclassification process ZRE009 fails when: the current period was not posted; contract changes
+were not valuated; or asset movements are pending. Error messages are technical and do not guide
+users toward resolution.
+
+Design response: Pre-reclassification checklist validating all prerequisites are met, with
+plain-language remediation instructions for each unmet condition.
+
+### PP-D: Difficulty Deleting or Blocking Contracts
+
+Contracts with existing postings cannot be deleted. Rescinded contracts remain visible in active
+contract lists, making operational filtering difficult.
+
+Design response: Clear contract lifecycle status in all views (Active / Rescinded / Exempt /
+Blocked). Filter and sort by lifecycle status as a standard feature.
+
+### PP-E: Missing Valuation Causing Silent Failures
+
+When users make contract changes but do not execute valuation before monthly processes, downstream
+runs produce incorrect results without warning.
+
+Design response: Mandatory valuation check before any batch calculation. System blocks period-end
+processing if unvaluated changes exist and displays a clear list of affected contracts.
+
+### PP-F: Unexpected Special Movements
+
+Upon contract rescission or retroactive changes, the system generates special P&L account movements
+that users cannot identify or explain to controllers or auditors.
+
+Design response: Every special system movement must carry a machine-generated plain-language
+explanation: what it is, why it was generated, which contract event triggered it, and the
+accounting standard basis (IFRS 16 paragraph reference).
+
+### PP-G: Amortization Visibility Problem
+
+Amortization amounts are only visible at asset class level, not at individual contract level.
+Finance staff cannot perform contract-level follow-up.
+
+Design response: Contract-level amortization report as a standard feature. Every amortization
+schedule stored and queryable by contract. Disclosure engine aggregates from contract-level data.
+
+### PP-H: Old Contracts Broken After Upgrades
+
+Contracts created before system upgrades may show differences between clearing amounts and expense
+amounts. These differences prevent valuation and posting and require manual fixes.
+
+Design response: Upgrade impact detection report identifying affected contracts. Guided remediation
+workflow with step-by-step instructions for each contract with clearing/expense differences.
+
+### PP-I: Foreign Currency Contract Complexity
+
+Foreign currency lease contracts require specific posting parameter configuration. Users do not
+know what configuration is needed or how to interpret the resulting balances.
+
+Design response: Currency-specific configuration guide and validation at contract intake.
+Multi-currency calculation support with explicit exchange rate handling and plain-language
+balance explanation.
+
+### PP-J: Extension and Rescission Problems
+
+If a contract extension or rescission is not executed and valuated in the correct sequence,
+monthly processes become inconsistent.
+
+Design response: Guided extension/rescission workflow enforcing the correct execution and valuation
+sequence. Status checks prevent out-of-sequence steps. Pending extension/rescission shown per contract.
+
+### PP-K: Poland Advance Payment Case
+
+Advance-payment lease contracts in Poland require distinct rules: separate Z assets and correct
+useful life in all asset areas. Generic process does not handle this.
+
+Design response: Country-specific rule configuration for advance-payment contracts. Pre-flight
+check validating useful life consistency across asset areas. Poland-specific documentation in the
+user manual.
+
+### PP-L: Date Mismatch Incidents
+
+Small date differences in start dates, end dates, or condition dates cause duplicate calculation
+entries or valuation differences that cascade through period-end processing.
+
+Design response: Date consistency validation at intake and before every calculation run. Detection
+of date anomalies with blocking alerts and guided correction.
+
+### PP-M: Outdated or Unclear User Manual
+
+The user manual is outdated, in English, and does not reflect the current configuration.
+Users cannot resolve common operational questions without specialist support.
+
+Design response: Multilingual user manual (Spanish-language version as baseline). Manual is a
+living document — every process change triggers a manual update. Role-based quick reference guides
+embedded in each Z transaction.
+
+---
+
+## General Pain Point Design Themes
+
+Across all 13 documented pain points, six design themes emerge that must be embedded in every
+feature:
+
+1. **Explainability:** Every system action explained in plain language (PP-B, PP-F, PP-I).
+2. **Guided workflows:** Multi-step processes use step-by-step wizards (PP-A, PP-C, PP-J, PP-K).
+3. **Pre-flight validation:** Prerequisites checked before processes run, not after failure (PP-C, PP-E, PP-L).
+4. **Contract-level visibility:** All reporting available at individual contract level (PP-G, PP-D).
+5. **Living documentation:** User guidance current, role-based, in the user's language (PP-M).
+6. **Upgrade resilience:** Design detects and remediates data quality issues from upgrades (PP-H).
 
 ---
 

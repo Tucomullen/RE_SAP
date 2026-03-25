@@ -1,3 +1,9 @@
+---
+name: uat-audit-pack
+description: >-
+  Generate a complete UAT test package for an IFRS 16 addon feature: test scenarios, expected results, audit evidence matrix, internal controls checklist, and sign-off register.
+---
+
 # Skill: UAT and Audit Pack Generator
 
 ## Title

@@ -4,6 +4,75 @@
 
 ---
 
+## Remediation Summary — 2026-03-24
+
+A full workspace audit and remediation was performed on branch `remediation/kiro-ide-first-v1`.
+The following changes were made to strengthen the workspace for Kiro IDE-first operation:
+
+### Safety Fixes
+- **CRITICAL:** Removed the dangerous auto-commit/push hook from `.claude/settings.json`.
+  The hook performed `git add -A && git commit && git push` automatically on every Claude session
+  end. This is now replaced with an empty hooks object. All git operations require explicit
+  human action.
+
+### Kiro IDE Normalization
+- All 8 `SKILL.md` files now have YAML frontmatter (`name` + `description`) required by Kiro IDE.
+- All 8 `agents/*.json` files now use URI-based resource references (`file://` and `skill://`).
+- `README.md` updated with IDE-first operating model table, agent strategy, and pain point overview.
+- `MIGRATION_NOTES_KIRO_IDE_FIRST.md` created — explains the IDE-first decision and provides
+  the CLI compatibility layer for terminal-only sessions.
+
+### Pain Points Incorporated (13 PP-A through PP-M)
+- `.kiro/steering/product.md` — all 13 pain points documented with design responses.
+- `specs/000-master-ifrs16-addon/requirements.md` — EPIC 10 added (10 new user stories),
+  personas updated with pain point cross-references, version updated to 0.2.
+- `specs/000-master-ifrs16-addon/design.md` — Section 11 added: 7 mitigation design patterns
+  covering all 13 pain points, ECC vs. S/4HANA flags per pattern.
+- `specs/000-master-ifrs16-addon/tasks.md` — Phase 1F added (T1-21 to T1-31), Phase 2
+  continuation tasks T2-10 to T2-16 added. MVP slice updated to include pain point tasks.
+- `docs/governance/risk-register.md` — Risks R-13 to R-22 added (pain-point-derived).
+- `knowledge/user-feedback/README.md` — All 13 pain points documented with persona,
+  severity, requirements link, design pattern, task, and risk cross-references.
+- `PAIN_POINTS_TRACEABILITY.md` created — full traceability matrix linking PP-A through PP-M
+  to requirements, design, tasks, risks, and knowledge.
+
+### Hooks Plan
+- `HOOKS_SETUP.md` created — 6 IDE-oriented hooks defined with trigger/action logic.
+  None perform git operations. All require Kiro IDE activation.
+
+### Files Modified or Created in This Remediation
+
+| File | Change |
+|------|--------|
+| `.claude/settings.json` | Dangerous hook removed |
+| `.kiro/skills/*/SKILL.md` (all 8) | YAML frontmatter added |
+| `.kiro/agents/*.json` (all 8) | Resources migrated to URI format |
+| `.kiro/steering/product.md` | 13 pain points + design themes added |
+| `specs/000-master-ifrs16-addon/requirements.md` | EPIC 10 + updated personas + version 0.2 |
+| `specs/000-master-ifrs16-addon/design.md` | Section 11 (7 mitigation patterns) + OQ-08 |
+| `specs/000-master-ifrs16-addon/tasks.md` | Phase 1F (T1-21–31) + Phase 2 (T2-10–16) |
+| `docs/governance/risk-register.md` | R-13 to R-22 added |
+| `knowledge/user-feedback/README.md` | 13 pain points fully documented |
+| `README.md` | Complete rewrite — IDE-first, pain points, agent strategy |
+| `HOOKS_SETUP.md` | New file — 6 hooks plan |
+| `PAIN_POINTS_TRACEABILITY.md` | New file — full pain point matrix |
+| `MIGRATION_NOTES_KIRO_IDE_FIRST.md` | New file — operating model documentation |
+| `BOOTSTRAP_SUMMARY.md` | This update |
+
+### Items Still Requiring Human Confirmation (TBC)
+
+| Item | Owner | Blocks |
+|------|-------|--------|
+| ZRE009 exact object name and trigger | SAP RE Functional Consultant | T1-25, T1-26 |
+| Poland advance payment contracts in scope for v1? | Project Governance Lead | T2-14 |
+| Exchange rate handling for multi-currency contracts | IFRS 16 Accountant + FI Architect | T2-13 |
+| Spanish-language manual priority vs. other locales | Project Governance Lead | T2-15 |
+| All Phase 0 TBC items from original bootstrap | Various | See BOOTSTRAP_SUMMARY §TBC Items |
+
+---
+
+---
+
 ## What Was Created
 
 Este workspace fue inicializado con **42 archivos** organizados en la siguiente estructura:

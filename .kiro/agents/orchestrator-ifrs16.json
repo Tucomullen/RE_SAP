@@ -12,63 +12,51 @@
   ],
   "resources": [
     {
-      "type": "file",
-      "path": "AGENTS.md",
+      "uri": "file://AGENTS.md",
       "description": "Mandatory behavioral rules for all agents"
     },
     {
-      "type": "file",
-      "path": "specs/000-master-ifrs16-addon/requirements.md",
+      "uri": "file://specs/000-master-ifrs16-addon/requirements.md",
       "description": "Master requirements — the axis of all delivery"
     },
     {
-      "type": "file",
-      "path": "specs/000-master-ifrs16-addon/design.md",
+      "uri": "file://specs/000-master-ifrs16-addon/design.md",
       "description": "Master design"
     },
     {
-      "type": "file",
-      "path": "specs/000-master-ifrs16-addon/tasks.md",
+      "uri": "file://specs/000-master-ifrs16-addon/tasks.md",
       "description": "Phased task backlog"
     },
     {
-      "type": "file",
-      "path": "docs/governance/decision-log.md",
+      "uri": "file://docs/governance/decision-log.md",
       "description": "ADR decision log"
     },
     {
-      "type": "file",
-      "path": "docs/governance/risk-register.md",
+      "uri": "file://docs/governance/risk-register.md",
       "description": "Risk register"
     },
     {
-      "type": "file",
-      "path": "docs/governance/assumptions-register.md",
+      "uri": "file://docs/governance/assumptions-register.md",
       "description": "Assumptions register"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/product.md",
+      "uri": "file://.kiro/steering/product.md",
       "description": "Product vision and goals"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/tech.md",
+      "uri": "file://.kiro/steering/tech.md",
       "description": "Technology strategy"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/ai-governance.md",
+      "uri": "file://.kiro/steering/ai-governance.md",
       "description": "AI governance rules"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/decision-policy.md",
+      "uri": "file://.kiro/steering/decision-policy.md",
       "description": "Decision policy and ADR rules"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/documentation-policy.md",
+      "uri": "file://.kiro/steering/documentation-policy.md",
       "description": "Documentation update policy"
     }
   ]

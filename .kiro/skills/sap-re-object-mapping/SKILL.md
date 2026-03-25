@@ -1,3 +1,9 @@
+---
+name: sap-re-object-mapping
+description: >-
+  Map an IFRS 16 functional requirement to SAP RE/RE-FX objects, identify data gaps, define required Z extensions, and produce a structured mapping document for ABAP Architect review.
+---
+
 # Skill: SAP RE Object Mapping
 
 ## Title

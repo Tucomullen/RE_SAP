@@ -1,3 +1,9 @@
+---
+name: ifrs16-contract-analysis
+description: >-
+  Analyze a lease contract for IFRS 16 scope, extract required data, identify missing fields, and produce a structured scoping memo with human validation requests.
+---
+
 # Skill: IFRS 16 Contract Analysis
 
 ## Title

@@ -12,43 +12,35 @@
   ],
   "resources": [
     {
-      "type": "file",
-      "path": "AGENTS.md",
+      "uri": "file://AGENTS.md",
       "description": "Mandatory behavioral rules"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/rag-policy.md",
+      "uri": "file://.kiro/steering/rag-policy.md",
       "description": "RAG policy — source hierarchy, metadata, versioning, chunking"
     },
     {
-      "type": "file",
-      "path": "knowledge/official-ifrs/README.md",
+      "uri": "file://knowledge/official-ifrs/README.md",
       "description": "Official IFRS knowledge index"
     },
     {
-      "type": "file",
-      "path": "knowledge/project-decisions/README.md",
+      "uri": "file://knowledge/project-decisions/README.md",
       "description": "Project decisions knowledge index"
     },
     {
-      "type": "file",
-      "path": "knowledge/sap-functional/README.md",
+      "uri": "file://knowledge/sap-functional/README.md",
       "description": "SAP functional knowledge index"
     },
     {
-      "type": "file",
-      "path": "knowledge/ux-stitch/README.md",
+      "uri": "file://knowledge/ux-stitch/README.md",
       "description": "UX Stitch knowledge index"
     },
     {
-      "type": "file",
-      "path": "knowledge/user-feedback/README.md",
+      "uri": "file://knowledge/user-feedback/README.md",
       "description": "User feedback knowledge index"
     },
     {
-      "type": "skill",
-      "path": ".kiro/skills/rag-curation/SKILL.md",
+      "uri": "skill://.kiro/skills/rag-curation/SKILL.md",
       "description": "RAG curation skill"
     }
   ]

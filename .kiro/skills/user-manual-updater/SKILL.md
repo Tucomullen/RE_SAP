@@ -1,3 +1,9 @@
+---
+name: user-manual-updater
+description: >-
+  Update the master user manual with role-based operational guidance for a new or changed IFRS 16 addon feature, including step-by-step instructions, plain-language IFRS 16 guidance, and release notes.
+---
+
 # Skill: User Manual Updater
 
 ## Title
