@@ -1,3 +1,9 @@
+---
+name: functional-spec-writer
+description: >-
+  Produce or update a functional specification for an IFRS 16 addon feature, covering business process, data requirements, UX, integration, and approval/audit trail design.
+---
+
 # Skill: Functional Specification Writer
 
 ## Title

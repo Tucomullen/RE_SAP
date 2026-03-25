@@ -11,33 +11,27 @@
   ],
   "resources": [
     {
-      "type": "file",
-      "path": "AGENTS.md",
+      "uri": "file://AGENTS.md",
       "description": "Mandatory behavioral rules"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/sap-re-architecture.md",
+      "uri": "file://.kiro/steering/sap-re-architecture.md",
       "description": "UX simplification principles"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/ai-governance.md",
+      "uri": "file://.kiro/steering/ai-governance.md",
       "description": "MCP content trust rules"
     },
     {
-      "type": "file",
-      "path": "knowledge/ux-stitch/README.md",
+      "uri": "file://knowledge/ux-stitch/README.md",
       "description": "UX Stitch knowledge index"
     },
     {
-      "type": "file",
-      "path": "knowledge/user-feedback/README.md",
+      "uri": "file://knowledge/user-feedback/README.md",
       "description": "User feedback knowledge index"
     },
     {
-      "type": "file",
-      "path": "specs/000-master-ifrs16-addon/requirements.md",
+      "uri": "file://specs/000-master-ifrs16-addon/requirements.md",
       "description": "Master requirements — user stories and personas"
     }
   ]

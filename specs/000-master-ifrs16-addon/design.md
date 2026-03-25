@@ -3,6 +3,7 @@
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 0.1 | 2026-03-24 | Bootstrap | Initial design baseline |
+| 0.2 | 2026-03-24 | Remediation | Added section 11 (Pain Point Mitigation Patterns), S/4HANA ECC flags, and open question OQ-08 |
 
 ---
 
@@ -265,3 +266,138 @@ All MCP integrations must pass security review before activation. See .kiro/stee
 | OQ-05 | What is the data retention policy for IFRS 16 audit tables? | Z table archiving design | Legal/DGO | Phase 1 |
 | OQ-06 | What AI service (Copilot/Gemini) is approved for end-user assistant layer? | Epic 7 design | IT/Security | Phase 2 |
 | OQ-07 | How are multi-currency leases handled? (If applicable) | Calculation engine | IFRS 16 Accountant + FI | Phase 1 |
+| OQ-08 | Is Poland advance-payment contract support in scope for v1? Confirm with Governance Lead. | T2-14, PP-K design | Project Governance Lead | Phase 2 |
+
+---
+
+## 11. Pain Point Mitigation Design Patterns
+
+The following design patterns address the 13 documented operational pain points
+(PP-A through PP-M). These patterns must be embedded in the corresponding components.
+See `PAIN_POINTS_TRACEABILITY.md` for the full traceability matrix.
+
+### 11.1 Pre-Flight Validation Pattern (PP-A, PP-C, PP-E, PP-L)
+
+Applied to: Contract Intake Wizard, ZRE009 Reclassification, Period-End Batch trigger.
+
+```
+User Action (save/trigger)
+       ↓
+Pre-flight Validator runs synchronously
+       ↓
+All conditions met? → YES → Continue to main processing
+                   → NO  → Display validation results panel:
+                            - List of unmet conditions
+                            - Plain-language explanation per condition
+                            - Remediation instruction per condition
+                            - Link to resolution transaction where applicable
+                          → Main processing BLOCKED until all conditions met
+```
+
+Design rules:
+- Every blocking condition must have a plain-language message (no SAP message codes shown raw to users).
+- Every blocking condition must have a resolution path the user can act on independently.
+- Pre-flight results are logged in `ZRIF16_AUDIT` with user ID, timestamp, and condition list.
+- ECC implementation: ABAP method in Z validator class. [ECC-SPECIFIC: in S/4HANA, consider ABAP
+  RAP validation framework if applicable to the RE-FX context].
+
+### 11.2 Special Posting Explanation Pattern (PP-B, PP-F)
+
+Applied to: Posting Handler, any Z program generating non-standard FI entries.
+
+```
+System-generated special posting
+       ↓
+Explanation Generator called with: posting type + triggering event + contract ID + IFRS 16 basis
+       ↓
+Plain-language explanation text generated from template
+       ↓
+Explanation stored in ZRIF16_AUDIT with FI document reference
+       ↓
+Explanation accessible via:
+  (a) Z audit transaction (ZRE_IFRS16_AUDIT) — for accountant and auditor
+  (b) FI document text field — for controller viewing FI directly
+```
+
+Design rules:
+- Explanation templates are defined per posting type in Z configuration table `ZRIF16_EXPLN_TMPL`.
+- Templates include placeholders for contract ID, period, amounts, and IFRS 16 paragraph reference.
+- Templates are configurable — allowing updates without code changes when explanations need refinement.
+- Language-specific templates can be maintained for multilingual support.
+- [ECC-SPECIFIC: FI document text field population approach to be confirmed with FI Architect].
+
+### 11.3 Contract Lifecycle Status Pattern (PP-D, PP-J)
+
+Applied to: All Z contract list views, Extension/Rescission Workflow.
+
+Lifecycle statuses and transitions:
+
+```
+Not Assessed → (IFRS 16 intake triggered) → Active
+Active → (exemption elected) → Exempt
+Active → (rescission executed and valuated) → Rescinded
+Active → (administrative block applied) → Blocked
+Active → (extension pending) → Extension Pending
+Active → (rescission pending) → Rescission Pending
+```
+
+Design rules:
+- Status stored in `ZRIF16_CNTRT` header field.
+- All contract list views default to filter: Active + Extension/Rescission Pending.
+- Rescinded contracts are VISIBLE with clear status label — never hidden.
+- Extension/Rescission workflow enforces sequence gate checks before status transitions.
+- [ECC-SPECIFIC: Status change events logged in change document for Z table; S/4HANA equivalent
+  would use ABAP RAP change documents if applicable].
+
+### 11.4 Contract-Level Amortization Reporting (PP-G)
+
+Applied to: Calculation Engine output, Disclosure Engine.
+
+Design rule: Every calculation run stores schedule data at line level in `ZRIF16_SCHED` with
+contract ID as a key field. No aggregation-only storage.
+
+Report structure:
+- Selection by contract ID (mandatory), period range (optional), company code.
+- Output: period-by-period table with opening balance, interest, depreciation, payment, closing balance.
+- Totals per year.
+- Export to spreadsheet (ALV OO standard download).
+- Disclosure engine reads from this same table — no separate aggregation layer needed.
+
+### 11.5 Upgrade Impact Detection (PP-H)
+
+Applied to: Administration and Configuration component (section 2.8).
+
+Trigger: Executed manually after any system upgrade or patch cycle.
+
+Logic:
+- Query all active contracts in ZRIF16_SCHED.
+- For each contract, compare: clearing amount in Z schedule vs. depreciation expense in FI-AA.
+- Report contracts where the difference exceeds a configurable tolerance.
+- Guided remediation: for each affected contract, present step-by-step correction instructions.
+
+Design rule: Remediation instructions are stored as configurable text in Z table — not hardcoded
+in ABAP. This allows updating guidance without a transport.
+
+### 11.6 Multilingual User Guidance (PP-M)
+
+Applied to: User Manual, Z transaction contextual help, error messages.
+
+Design rule: All user-visible text in Z transactions uses message class `ZRIF16_MSGS` with
+language-dependent maintenance. Spanish (`S`) is the primary non-English target language.
+
+User manual structure:
+- `docs/user/master-user-manual.md` — English (primary, always current).
+- `docs/user/master-user-manual-es.md` — Spanish (maintained in sync with English version).
+- Every process change triggers an update to both language versions before task closure.
+- Contextual help texts in Z transactions are maintained in the same message class.
+
+### 11.7 ECC vs. S/4HANA Design Flags for Pain Point Features
+
+| Feature | ECC Approach | S/4HANA PCE Consideration |
+|---------|-------------|--------------------------|
+| Pre-flight validation | ABAP class methods | Review ABAP RAP validation hooks if RE-FX migrated to RAP model |
+| Explanation templates | Z config table | Same approach; FIORI UI may require Odata adaptation |
+| Contract lifecycle status | Z field in ZRIF16_CNTRT | If standard S/4 RE offers lifecycle fields, use standard first |
+| Special posting text | FI document text field | Standard approach should remain valid; confirm with FI team |
+| Upgrade impact report | Custom report | Equivalent functionality may exist in S/4 RE migration tools |
+| Multilingual messages | Message class ZRIF16_MSGS | Standard SAP translation workbench; compatible with S/4 |

@@ -11,28 +11,23 @@
   ],
   "resources": [
     {
-      "type": "file",
-      "path": "AGENTS.md",
+      "uri": "file://AGENTS.md",
       "description": "Mandatory behavioral rules"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/ifrs16-domain.md",
+      "uri": "file://.kiro/steering/ifrs16-domain.md",
       "description": "IFRS 16 domain — mandatory human validation points"
     },
     {
-      "type": "file",
-      "path": "specs/000-master-ifrs16-addon/requirements.md",
+      "uri": "file://specs/000-master-ifrs16-addon/requirements.md",
       "description": "Master requirements — acceptance criteria"
     },
     {
-      "type": "file",
-      "path": "docs/governance/risk-register.md",
+      "uri": "file://docs/governance/risk-register.md",
       "description": "Risk register — for test prioritization"
     },
     {
-      "type": "skill",
-      "path": ".kiro/skills/uat-audit-pack/SKILL.md",
+      "uri": "skill://.kiro/skills/uat-audit-pack/SKILL.md",
       "description": "UAT and audit pack skill"
     }
   ]

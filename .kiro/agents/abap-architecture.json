@@ -10,33 +10,27 @@
   ],
   "resources": [
     {
-      "type": "file",
-      "path": "AGENTS.md",
+      "uri": "file://AGENTS.md",
       "description": "Mandatory behavioral rules"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/tech.md",
+      "uri": "file://.kiro/steering/tech.md",
       "description": "Technology strategy and ABAP standards"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/structure.md",
+      "uri": "file://.kiro/steering/structure.md",
       "description": "Naming conventions for Z objects"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/sap-re-architecture.md",
+      "uri": "file://.kiro/steering/sap-re-architecture.md",
       "description": "SAP RE architecture and technical debt risks"
     },
     {
-      "type": "file",
-      "path": "docs/technical/master-technical-design.md",
+      "uri": "file://docs/technical/master-technical-design.md",
       "description": "Master technical design baseline"
     },
     {
-      "type": "skill",
-      "path": ".kiro/skills/technical-design-writer/SKILL.md",
+      "uri": "skill://.kiro/skills/technical-design-writer/SKILL.md",
       "description": "Technical design writing skill"
     }
   ]

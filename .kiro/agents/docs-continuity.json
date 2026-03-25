@@ -11,48 +11,39 @@
   ],
   "resources": [
     {
-      "type": "file",
-      "path": "AGENTS.md",
+      "uri": "file://AGENTS.md",
       "description": "Mandatory behavioral rules"
     },
     {
-      "type": "file",
-      "path": ".kiro/steering/documentation-policy.md",
+      "uri": "file://.kiro/steering/documentation-policy.md",
       "description": "Documentation policy — update rules, style, traceability"
     },
     {
-      "type": "file",
-      "path": "docs/functional/master-functional-design.md",
+      "uri": "file://docs/functional/master-functional-design.md",
       "description": "Master functional design"
     },
     {
-      "type": "file",
-      "path": "docs/technical/master-technical-design.md",
+      "uri": "file://docs/technical/master-technical-design.md",
       "description": "Master technical design"
     },
     {
-      "type": "file",
-      "path": "docs/user/master-user-manual.md",
+      "uri": "file://docs/user/master-user-manual.md",
       "description": "Master user manual"
     },
     {
-      "type": "file",
-      "path": "docs/governance/decision-log.md",
+      "uri": "file://docs/governance/decision-log.md",
       "description": "Decision log — for changelog entries"
     },
     {
-      "type": "skill",
-      "path": ".kiro/skills/functional-spec-writer/SKILL.md",
+      "uri": "skill://.kiro/skills/functional-spec-writer/SKILL.md",
       "description": "Functional spec writing skill"
     },
     {
-      "type": "skill",
-      "path": ".kiro/skills/technical-design-writer/SKILL.md",
+      "uri": "skill://.kiro/skills/technical-design-writer/SKILL.md",
       "description": "Technical design writing skill"
     },
     {
-      "type": "skill",
-      "path": ".kiro/skills/user-manual-updater/SKILL.md",
+      "uri": "skill://.kiro/skills/user-manual-updater/SKILL.md",
       "description": "User manual update skill"
     }
   ]

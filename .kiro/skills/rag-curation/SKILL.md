@@ -1,3 +1,9 @@
+---
+name: rag-curation
+description: >-
+  Audit and maintain the RAG knowledge base: classify new sources, assign metadata, detect duplicates and conflicts, update knowledge indexes, and ensure all sources meet the standards in rag-policy.md.
+---
+
 # Skill: RAG Knowledge Curation
 
 ## Title

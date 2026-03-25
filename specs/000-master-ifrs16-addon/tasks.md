@@ -3,6 +3,7 @@
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 0.1 | 2026-03-24 | Bootstrap | Initial phased backlog |
+| 0.2 | 2026-03-24 | Remediation | Added Phase 1F (pain point mitigation tasks T1-21 to T1-31) and Phase 2 pain point continuations |
 
 ---
 
@@ -90,6 +91,26 @@ Tasks are organized by phase. Each task has: ID, title, description, dependencie
 | T1-19 | Implement authorization checks | Add authorization checks to all IFRS 16 transactions | T1-18 | HUM-ABAP + HUM-SEC | All transactions enforce auth objects; SOD violations blocked | docs/technical updated | AGT-QA SOD test |
 | T1-20 | UAT Phase 1 execution | Execute UAT pack for Phase 1 features | T1-12, T1-17, T1-19 | HUM (all personas) + AGT-QA | All Critical UAT scenarios PASS; no open Critical defects | docs/user finalized for Phase 1 | HUM-ACC + HUM-RE + HUM-GOV sign-off |
 
+### P1-F: Pain Point Mitigation (Epic 10)
+
+> These tasks directly address the 13 documented operational pain points (PP-A through PP-M).
+> They run in parallel with other Phase 1 sub-phases and must be completed before Phase 1 UAT.
+> Source: `PAIN_POINTS_TRACEABILITY.md` and `knowledge/user-feedback/README.md`.
+
+| Task ID | Title | Description | Dependencies | Owner | Done Criteria | Doc Update | QA Gate |
+|---------|-------|-------------|--------------|-------|--------------|------------|---------|
+| T1-21 | Functional spec — contract intake validation (PP-A, PP-L) | Write functional spec for pre-flight validation at contract intake: mandatory field checks, date consistency validation, plain-language error messages. Reference US-10.1 | T1-10 (intake spec exists) | AGT-RE + HUM-RE + HUM-ACC | Spec lists all validated fields with their rules; plain-language messages defined; signed off | docs/functional updated | HUM-RE + HUM-ACC |
+| T1-22 | ABAP development — contract intake validation | Implement intake validation logic with plain-language messages. Block progress to IFRS 16 calculation until all mandatory fields pass. | T1-21, T1-12 | HUM-ABAP | All PP-A and PP-L validation rules implemented; no IFRS 16-critical field can be blank at calculation trigger; error messages tested in non-English locale | docs/user updated | AGT-QA PP-A/L scenarios |
+| T1-23 | Functional spec — pre-batch valuation check (PP-E) | Write functional spec for pre-batch check: detect unvaluated contract changes before period-end batch; display affected contract list; block batch with remediation guidance. Reference US-10.5 | T1-13 | AGT-RE + HUM-RE | Spec defines check logic and blocked-state display; signed off | docs/functional updated | HUM-RE + HUM-ACC |
+| T1-24 | ABAP development — pre-batch valuation check | Implement valuation status check in period-end batch program. Block execution if unvaluated changes detected. Display affected contracts with links to valuation transaction. | T1-23, T1-17 | HUM-ABAP | Batch correctly blocked when unvaluated changes exist; affected contract list accurate; user can navigate to valuation transaction | docs/user updated | AGT-QA PP-E scenarios |
+| T1-25 | Functional spec — ZRE009 pre-flight checklist (PP-C) | Write functional spec for ZRE009 reclassification pre-flight: verify current period posted, all changes valuated, no pending asset movements. Plain-language remediation for each unmet condition. Reference US-10.3 | T1-13, T1-15 | AGT-RE + AGT-DOM + HUM-ACC | Spec covers all known ZRE009 failure modes; signed off by Lease Accountant | docs/functional updated | HUM-ACC + HUM-RE |
+| T1-26 | ABAP development — ZRE009 pre-flight checklist | Implement pre-reclassification checklist with blocking behavior and remediation display. [SAP transaction/object name TBC with Functional Consultant] | T1-25, T1-16 | HUM-ABAP | All ZRE009 blocking conditions covered; remediation guidance displayed per condition; accountant confirms guidance text is correct | docs/user updated | AGT-QA PP-C scenarios |
+| T1-27 | Functional spec — special posting explainability (PP-B, PP-F) | Write functional spec for machine-generated explanations attached to all system-generated special postings: what the posting is, why it exists, triggering event, IFRS 16 basis. Reference US-10.2 | T1-15, T1-16 | AGT-DOM + HUM-ACC | Spec covers all known special posting types with explanation templates; signed off | docs/functional updated | HUM-ACC |
+| T1-28 | ABAP development — special posting explanations | Implement explanation attachment mechanism for system-generated special postings. Explanations stored in Z audit table and linked to FI document reference. | T1-27, T1-16 | HUM-ABAP | Every special posting type has a system-generated explanation; explanation visible in FI document display and Z audit transaction | docs/user updated | AGT-QA PP-B/F scenarios |
+| T1-29 | Functional spec — contract lifecycle status and filtering (PP-D) | Write functional spec for contract lifecycle status display: Active / Rescinded / Exempt / Blocked. Default filter to Active. Status visible in all Z contract list views. Reference US-10.4 | T1-10 | AGT-RE + HUM-RE | Spec defines all lifecycle statuses, transitions, and filter behavior; signed off | docs/functional updated | HUM-RE |
+| T1-30 | Functional spec — contract-level amortization report (PP-G) | Write functional spec for contract-level amortization view: period, opening balance, interest, depreciation, payment, closing balance. Exportable. Reference US-10.6 | T1-05, T1-07 | AGT-DOM + AGT-RE + HUM-ACC | Spec defines all columns, calculation source references, and export format; signed off | docs/functional updated | HUM-ACC |
+| T1-31 | UAT scenarios — EPIC 10 pain point coverage | Generate UAT test pack covering all EPIC 10 acceptance criteria (US-10.1 through US-10.10). Include edge cases for each pain point and regression scenarios. | T1-22, T1-24, T1-26, T1-28, T1-29, T1-30 | AGT-QA | UAT pack covers all US-10.x acceptance criteria; manual calculation cross-check prepared by IFRS 16 Accountant for all affected scenarios | docs/user updated | HUM-ACC + HUM-RE sign-off |
+
 ---
 
 ## PHASE 2 — Modifications, Governance and Disclosure
@@ -106,6 +127,14 @@ Tasks are organized by phase. Each task has: ID, title, description, dependencie
 | T2-07 | Disclosure engine — rollforward | Implement ROU asset and liability rollforward disclosure | T2-06 | HUM-ABAP | Report matches period GL movements | docs/user updated | HUM-ACC + HUM-GOV |
 | T2-08 | Reconciliation report | Implement schedule-vs-GL reconciliation report | Phase 1 complete | HUM-ABAP | Report correctly identifies all reconciled and unreconciled items | docs/user updated | HUM-ACC |
 | T2-09 | UAT Phase 2 execution | Execute UAT pack for Phase 2 features | T2-05, T2-08 | HUM (all personas) + AGT-QA | All Critical UAT scenarios PASS | docs/user finalized for Phase 2 | HUM-ACC + HUM-RE + HUM-GOV sign-off |
+
+| T2-10 | ABAP development — extension/rescission guided workflow (PP-J) | Implement guided workflow for contract extension and rescission: enforce mandatory sequence, status checks per step. Reference US-10.8 | T2-03, T1-29 | HUM-ABAP | Workflow enforces sequence; out-of-order steps blocked; pending extension/rescission visible per contract | docs/user updated | AGT-QA PP-J scenarios |
+| T2-11 | ABAP development — contract-level amortization report (PP-G) | Implement the contract-level amortization report per spec T1-30. Queryable by contract. Exportable. | T1-30, T2-03 | HUM-ABAP | Report shows full schedule per contract; export works; reconciles to GL movements | docs/user updated | HUM-ACC |
+| T2-12 | Upgrade impact detection report (PP-H) | Design and implement report identifying contracts with clearing vs. expense amount differences from upgrades. Guided remediation workflow per affected contract. Reference US-10.7 | Phase 1 complete | AGT-ABAP + HUM-ABAP | Report correctly identifies all affected contracts; remediation steps documented and tested | docs/technical + docs/user updated | AGT-QA + HUM-ABAP |
+| T2-13 | Foreign currency contract support (PP-I) | Implement multi-currency calculation support with currency-specific validation at intake and plain-language balance explanation. Reference US-10.10. [Exchange rate strategy TBC with FI team] | T1-21, T2-03 | AGT-DOM + HUM-ABAP + HUM-ACC | FC contracts calculate correctly; balance display shows exchange rate and plain-language explanation; FI team validates posting approach | docs/functional + docs/user updated | HUM-ACC + FI Consultant |
+| T2-14 | Country-specific rules — Poland advance payment (PP-K) | Implement country-specific rule configuration for Poland advance-payment contracts. Pre-flight check for useful life consistency across asset areas. Reference US-10.9. [Poland scope must be confirmed by Governance Lead] | T2-03, T1-18 | HUM-ABAP + Local Finance | Poland advance payment contracts processed correctly; useful life check validates all areas; user manual section for Poland complete | docs/user Poland section | Local Finance + HUM-ACC |
+| T2-15 | Multilingual user manual — Spanish baseline (PP-M) | Produce Spanish-language baseline of the master user manual, aligned with the current functional spec. Reference US-10.9. | T2-09 (Phase 2 UAT done) | AGT-DOCS + HUM (Language review) | Spanish manual covers all Phase 1+2 features; reviewed by Spanish-speaking target persona; released as docs/user/master-user-manual-es.md | docs/user: new ES file | HUM (target persona) |
+| T2-16 | UAT Phase 2 continuation — pain point scenarios | Extend Phase 2 UAT to cover T2-10 through T2-15 scenarios. All EPIC 10 continuation acceptance criteria tested. | T2-10 to T2-15 | HUM (all personas) + AGT-QA | All continuation scenarios PASS; no open Critical defects in pain point coverage | docs/user finalized for Phase 2 | HUM-ACC + HUM-RE + HUM-GOV |
 
 ---
 
@@ -133,7 +162,12 @@ The following tasks constitute the minimum viable release that delivers measurab
 | Must Have | T1-10 to T1-12 (intake) | User can capture IFRS 16 data |
 | Must Have | T1-13 to T1-17 (batch + posting) | Period-end run produces FI entries |
 | Must Have | T1-18 to T1-20 (controls + UAT) | Auditable, controlled process |
+| Must Have | T1-21 to T1-26 (intake validation, pre-batch check, ZRE009 preflight) | Core pain point prevention (PP-A, PP-C, PP-E, PP-L) |
+| Must Have | T1-27, T1-28 (special posting explainability) | User cannot interpret system actions without this (PP-B, PP-F) |
+| Must Have | T1-29 (lifecycle status) | Operational visibility (PP-D) |
+| Must Have | T1-30, T1-31 (contract amortization + Epic 10 UAT) | Contract-level visibility and pain point UAT gate (PP-G) |
 | Should Have | T2-06 (maturity analysis) | Basic disclosure output |
+| Should Have | T2-10, T2-11 (extension workflow, contract amortization impl.) | Phase 2 pain point continuations (PP-G, PP-J) |
 | Can defer | T2-01 to T2-05 (modifications) | Phase 2 |
-| Can defer | T2-07, T2-08 (rollforward, reconciliation) | Phase 2 |
+| Can defer | T2-07, T2-08, T2-12 to T2-15 (rollforward, reconciliation, upgrades, FC, Poland, multilingual manual) | Phase 2 |
 | Defer | All Phase 3 | Phase 3 |

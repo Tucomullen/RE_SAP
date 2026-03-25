@@ -3,6 +3,7 @@
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 0.1 | 2026-03-24 | Bootstrap | Initial risk register |
+| 0.2 | 2026-03-24 | Remediation | Added pain-point-derived operational risks R-13 to R-22 |
 
 ---
 
@@ -31,6 +32,17 @@
 | R-11 | Scope | Lessor accounting requirements emerge during project — scope creep risk | 3 | 3 | 9 | **MEDIUM** | Explicit out-of-scope statement in requirements.md. Change control process for scope additions. Estimate cost before accepting scope changes. | Project Governance Lead | Open | 2026-03-24 |
 | R-12 | Integration | FI-AA BAPI/FM for ROU asset creation does not support required scenarios — custom posting approach needed | 3 | 3 | 9 | **MEDIUM** | Confirm FI-AA integration approach in Phase 0 (OQ-03). Identify gap early to allow solution design time. | ABAP Architect + FI Consultant | Open | 2026-03-24 |
 
+| R-13 | UX/Operational | Validation gaps allow contracts with configuration errors (wrong dates, currency, object type) to reach the calculation engine — downstream failures occur silently | 4 | 4 | 16 | **HIGH** | Implement pre-flight validation with plain-language messages at contract intake (US-10.1). Block calculation until all mandatory fields pass validation. | SAP RE Functional Consultant | Open | 2026-03-24 |
+| R-14 | UX/Operational | Users cannot interpret retroactive change postings and special movements — reconciliation delays and audit findings | 4 | 3 | 12 | **MEDIUM** | Attach machine-generated plain-language explanation to every system-generated special posting (US-10.2). Link to IFRS 16 paragraph reference. | Lease Accountant + ABAP Architect | Open | 2026-03-24 |
+| R-15 | Process | ZRE009 reclassification fails at period-end due to unmet prerequisites — period close is blocked | 4 | 4 | 16 | **HIGH** | Implement pre-reclassification checklist that validates all prerequisites before ZRE009 runs (US-10.3). Block with remediation guidance. | Lease Accountant + ABAP Architect | Open | 2026-03-24 |
+| R-16 | Data Quality | Unvaluated contract changes cause period-end batch to produce incorrect results without warning — silent data quality failure | 4 | 4 | 16 | **HIGH** | Implement pre-batch valuation check — batch blocked until all changes are valuated (US-10.5). Display affected contract list. | Lease Accountant | Open | 2026-03-24 |
+| R-17 | Data Quality | Date mismatches in start/end/condition dates create duplicate entries or valuation differences — cascading period-end errors | 3 | 4 | 12 | **MEDIUM** | Date consistency validation at contract intake and before every calculation run (US-10.1). Blocking alerts for date anomalies. | RE Contract Manager + ABAP Architect | Open | 2026-03-24 |
+| R-18 | Technical | Old contracts affected by upgrade data quality issues (clearing vs. expense differences) cannot be processed without manual remediation — upgrade readiness risk | 3 | 3 | 9 | **MEDIUM** | Upgrade impact detection report and guided remediation workflow (US-10.7). Test coverage for upgrade scenarios in regression suite. | ABAP Architect + IT/ABAP Support | Open | 2026-03-24 |
+| R-19 | Compliance | Country-specific rules for Poland advance payment contracts are not implemented — non-compliance for local portfolio | 2 | 4 | 8 | **MEDIUM** | Country-specific rule configuration for advance-payment contracts (US-10.9). Pre-flight check for useful life consistency. Confirm scope with project governance. | Project Governance Lead + Local Finance | Open | 2026-03-24 |
+| R-20 | UX | Amortization is only visible at asset class level — users cannot perform contract-level follow-up, blocking IFRS 16 disclosure work | 4 | 3 | 12 | **MEDIUM** | Contract-level amortization report as standard feature (US-10.6). All schedule data stored queryable by contract ID. | Lease Accountant | Open | 2026-03-24 |
+| R-21 | UX | Foreign currency contract complexity causes user errors in posting parameter configuration — incorrect balances and misinterpretation | 3 | 3 | 9 | **MEDIUM** | Currency-specific validation and configuration guide at intake (US-10.10). Plain-language balance explanation for FC contracts. | RE Contract Manager + FI Architect | Open | 2026-03-24 |
+| R-22 | Documentation | User manual is outdated and in English only — users escalate common questions to specialists, increasing error rate and project support burden | 4 | 2 | 8 | **MEDIUM** | Living user manual with mandatory update process on every process change (US-10.9). Spanish-language baseline. Role-based quick reference guides. | AI/Kiro Practitioner + HUM-ACC | Open | 2026-03-24 |
+
 ---
 
 ## Risk Escalation Thresholds
@@ -47,6 +59,9 @@
 |----|------|--------------------------|
 | R-04 | Accounting policy elections not decided | **IMMEDIATE:** Schedule accounting policy workshop with IFRS 16 Accountant. Block Phase 1 design start. |
 | R-01 | RE-FX mapping complexity | **Phase 0 Priority:** Schedule blueprint workshop (T0-02). |
+| R-13 | Contract configuration errors reach calculation engine | **Phase 1 Priority:** Implement pre-flight validation at contract intake (Epic 10, US-10.1). |
+| R-15 | ZRE009 reclassification blocked at period-end | **Phase 1 Priority:** Implement ZRE009 pre-flight checklist (Epic 10, US-10.3). |
+| R-16 | Unvaluated changes cause silent batch failures | **Phase 1 Priority:** Implement pre-batch valuation check (Epic 10, US-10.5). |
 
 ---
 

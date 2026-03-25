@@ -1,43 +1,105 @@
 # RE-SAP: IFRS 16 Automation Addon for SAP RE/RE-FX
 
 ## Project Name
-**RE-SAP IFRS16 Addon** — Enterprise Z-addon for SAP ECC (RE/RE-FX module) that automates IFRS 16 lease accounting processes with AI-assisted governance, multiagent orchestration, and living documentation.
+
+**RE-SAP IFRS16 Addon** — Enterprise Z-addon for SAP ECC (RE/RE-FX module) that automates
+the IFRS 16 lease accounting lifecycle with AI-assisted governance, multiagent orchestration,
+and living documentation. Designed for ECC today and migration-aware for SAP S/4HANA Private
+Cloud Edition in the future.
+
+---
+
+## Primary Operating Model: Kiro IDE-First
+
+This project is operated primarily through **Kiro IDE**. Kiro IDE is the preferred runtime
+for all specs, hooks, steering, MCP, and subagent workflows.
+
+| Operating Model | Status | Usage |
+|----------------|--------|-------|
+| **Kiro IDE** | **PRIMARY** | All spec execution, agent sessions, steering, hooks, MCP |
+| Kiro CLI | Secondary | Lightweight scripting only; does not replace IDE agent workflows |
+
+Why Kiro IDE is primary:
+- This project depends on Specs, Hooks, Steering, MCP, and subagents — all native Kiro IDE features.
+- The orchestrator + specialist agent model requires IDE-level agent coordination.
+- Documentation continuity, knowledge curation, and governance automation are designed for the IDE workflow.
+
+See [MIGRATION_NOTES_KIRO_IDE_FIRST.md](MIGRATION_NOTES_KIRO_IDE_FIRST.md) for full
+operating model documentation and the CLI compatibility layer.
 
 ---
 
 ## Purpose
-This project delivers a structured, auditable, and AI-governed solution to automate the IFRS 16 lifecycle within SAP Real Estate (RE/RE-FX). The goal is to eliminate manual spreadsheets, reduce calculation errors, enforce accounting explainability, and produce audit-ready evidence — all inside SAP, with an AI assistant layer to support users.
+
+This project delivers a structured, auditable, and AI-governed solution to automate the IFRS 16
+lifecycle within SAP Real Estate (RE/RE-FX). The goal is to eliminate manual spreadsheets, reduce
+calculation errors, enforce accounting explainability, and produce audit-ready evidence — all inside
+SAP, with an AI assistant layer to support users.
+
+The addon addresses real, documented operational pain points experienced by users of SAP RE/IFRS 16
+processes. See [PAIN_POINTS_TRACEABILITY.md](PAIN_POINTS_TRACEABILITY.md) for the full traceability
+matrix linking each pain point to requirements, design, tasks, and risk register.
 
 ---
 
 ## Scope
-- **In scope:** Lessee accounting under IFRS 16, SAP ECC RE/RE-FX processes, Z-addon development, AI-assisted decision support, RAG knowledge management, UAT governance, disclosure output support.
-- **Out of scope (v1):** Lessor accounting, SAP S/4HANA migration execution, direct ERP posting automation without human approval gate (phased in later), non-RE lease categories unless explicitly included.
+
+- **In scope:** Lessee accounting under IFRS 16, SAP ECC RE/RE-FX processes, Z-addon development,
+  AI-assisted decision support, RAG knowledge management, UAT governance, disclosure output support.
+- **S/4HANA awareness:** All design decisions are migration-aware. ECC-specific choices are flagged
+  for future SAP S/4HANA Private Cloud Edition compatibility review.
+- **Out of scope (v1):** Lessor accounting, SAP S/4HANA migration execution, direct ERP posting
+  automation without human approval gate, non-RE lease categories unless explicitly included.
+
+---
+
+## Top Operational Pain Points Addressed
+
+This addon is driven by real user pain points documented in `knowledge/user-feedback/`.
+
+| ID | Pain Point | Impact |
+|----|-----------|--------|
+| PP-A | Contract configuration errors (dates, currency, object type, periodicity) | Valuation and posting failures |
+| PP-B | Retroactive changes in closed periods generate uninterpretable special postings | Reconciliation burden |
+| PP-C | Debt reclassification failures (ZRE009) when period not posted or changes not valuated | Period-end blocking errors |
+| PP-D | Contracts with postings cannot be deleted; rescinded contracts remain visible | Operational clutter, control risk |
+| PP-E | Contract changes without valuation cause downstream process failures | Silent data quality issues |
+| PP-F | Special P&L movements on rescission/retroactive changes are unexplained to users | Audit and controller confusion |
+| PP-G | Amortization only visible by asset class, not by individual contract | No contract-level follow-up possible |
+| PP-H | Old contracts broken after upgrades (clearing vs. expense amount differences) | Manual remediation before processing |
+| PP-I | Foreign currency contracts require specific posting config; unclear to users | Balance interpretation uncertainty |
+| PP-J | Extension/rescission not executed correctly causes monthly process inconsistency | Period-end failures |
+| PP-K | Poland advance payment contracts need distinct rules and correct useful life | Country-specific compliance risk |
+| PP-L | Date mismatches (start/end/condition dates) create duplicates or valuation errors | Data quality incidents |
+| PP-M | User manual is outdated, in English, does not reflect current configuration | Users cannot self-serve; error rate high |
 
 ---
 
 ## Repository Structure
 
 ### `.kiro/`
+
 Kiro workspace configuration — the intelligence layer of the project.
 
 | Subfolder | Purpose |
 |-----------|---------|
-| `.kiro/agents/` | Agent definitions (orchestrator + specialists). Each JSON file defines a Kiro agent with its role, prompt, resources, and tools. |
-| `.kiro/steering/` | Steering documents that inject persistent context into every agent interaction. Cover product vision, tech strategy, domain rules, governance, and policies. |
-| `.kiro/skills/` | Reusable skill playbooks. Each `SKILL.md` defines a repeatable task procedure for agents and human practitioners. |
+| `.kiro/agents/` | Agent definitions (orchestrator + 7 specialists). JSON files with URI-based resources (file:// and skill://) for Kiro IDE. |
+| `.kiro/steering/` | Steering documents injecting context into every agent interaction. Frontmatter controls inclusion (always / auto). |
+| `.kiro/skills/` | Reusable skill playbooks. Each SKILL.md has YAML frontmatter (name + description) plus a detailed procedure. |
 
 ### `specs/`
-Master specification documents for the addon. The primary artifact driving all development.
+
+Master specification documents — the primary axis driving all development.
 
 | File | Purpose |
 |------|---------|
-| `specs/000-master-ifrs16-addon/requirements.md` | Epics, user stories, acceptance criteria, scope, assumptions, risks. |
-| `specs/000-master-ifrs16-addon/design.md` | Architecture, component model, agent interaction, RAG, UX flow, MCP integration. |
-| `specs/000-master-ifrs16-addon/tasks.md` | Phased backlog with owners, dependencies, done criteria, and QA gates. |
+| `specs/000-master-ifrs16-addon/requirements.md` | Epics, user stories, acceptance criteria, pain-point stories, assumptions, risks. |
+| `specs/000-master-ifrs16-addon/design.md` | Architecture, component model, pain point mitigation patterns, agent interaction, RAG, MCP. |
+| `specs/000-master-ifrs16-addon/tasks.md` | Phased backlog with owners, dependencies, done criteria, QA gates, pain-point work packages. |
 
 ### `knowledge/`
-RAG-ready knowledge base. Organized by source type. Each folder has a `README.md` explaining ingestion rules.
+
+RAG-ready knowledge base. Organized by source type.
 
 | Folder | Content |
 |--------|---------|
@@ -45,9 +107,10 @@ RAG-ready knowledge base. Organized by source type. Each folder has a `README.md
 | `knowledge/project-decisions/` | ADRs and design decisions with rationale. |
 | `knowledge/sap-functional/` | SAP RE/RE-FX process references, object catalogs, screenshots. |
 | `knowledge/ux-stitch/` | Google Stitch designs, UI exports, MCP-fed design artifacts. |
-| `knowledge/user-feedback/` | Real user pain points, UAT observations, support tickets. |
+| `knowledge/user-feedback/` | Real user pain points, UAT observations, support tickets. All 13 pain points documented here. |
 
 ### `docs/`
+
 Living documentation. Always updated when specs or implementation change.
 
 | File | Purpose |
@@ -59,35 +122,75 @@ Living documentation. Always updated when specs or implementation change.
 | `docs/governance/risk-register.md` | Project and compliance risks with mitigation. |
 | `docs/governance/assumptions-register.md` | Tracked assumptions with validation status. |
 
+### Root Files
+
+| File | Purpose |
+|------|---------|
+| `AGENTS.md` | 10 mandatory behavioral rules for all AI agents. |
+| `BOOTSTRAP_SUMMARY.md` | Workspace initialization and activation guide. |
+| `PAIN_POINTS_TRACEABILITY.md` | Cross-reference matrix: pain points to requirements, risks, tasks, design. |
+| `HOOKS_SETUP.md` | Kiro IDE hooks plan with trigger/action logic and setup instructions. |
+| `MIGRATION_NOTES_KIRO_IDE_FIRST.md` | Operating model: IDE-first rationale and CLI compatibility layer. |
+
 ---
 
 ## First Recommended Actions
 
-1. **Read `BOOTSTRAP_SUMMARY.md`** — Understand what has been created and the recommended activation sequence.
-2. **Review `.kiro/steering/product.md` and `.kiro/steering/ifrs16-domain.md`** — Align on product vision and IFRS 16 domain constraints before any work begins.
-3. **Open `specs/000-master-ifrs16-addon/requirements.md`** — Review epics, stories, and acceptance criteria. Mark which requirements need human validation.
-4. **Activate the Orchestrator agent** — Open `.kiro/agents/orchestrator-ifrs16.json` and start a session to plan the first iteration.
-5. **Populate `knowledge/`** — Add official IFRS 16 documents, internal SAP RE screenshots, and user pain point evidence to enable RAG retrieval.
-6. **Complete `docs/governance/assumptions-register.md`** — Validate or challenge initial assumptions before design work proceeds.
-7. **Review `AGENTS.md`** — Ensure all team members and AI practitioners understand agent behavioral rules.
+1. **Read `AGENTS.md`** — Non-negotiable behavioral rules before any agent session.
+2. **Review `.kiro/steering/product.md` and `.kiro/steering/ifrs16-domain.md`** — Align on product vision and domain constraints.
+3. **Read `PAIN_POINTS_TRACEABILITY.md`** — Understand which real user problems this addon must solve.
+4. **Resolve CRITICAL Risk R-04** — IFRS 16 accounting policy elections must be signed off before Phase 1 design. See `docs/governance/risk-register.md`.
+5. **Activate the Orchestrator in Kiro IDE** — Open `.kiro/agents/orchestrator-ifrs16.json` and start a session.
+6. **Populate `knowledge/`** — Add official IFRS 16 documents, SAP RE screenshots, and user evidence.
+7. **Complete Phase 0 tasks** — All T0-01 through T0-08 must be done before Phase 1 development begins.
+
+---
+
+## Agent Strategy
+
+### Orchestrator (Primary IDE Entry Point)
+
+`orchestrator-ifrs16` is the primary entry point for all project sessions in Kiro IDE.
+It owns delivery program, traceability, governance enforcement, and coordinates all specialists.
+It blocks premature task closure and must be activated in Kiro IDE for full multiagent coordination.
+
+### Specialists (engage via orchestrator or directly)
+
+| Agent | Domain | Engage Directly When |
+|-------|--------|---------------------|
+| `ifrs16-domain` | IFRS 16 accounting rules | Accounting analysis, scope questions, modification classification |
+| `sap-re-ifrs16` | SAP RE/RE-FX processes | Field mapping, process design, blueprint prep |
+| `abap-architecture` | ABAP technical design | Z object design, integration patterns, performance |
+| `rag-knowledge` | Knowledge base health | Phase start health check, new source curation |
+| `docs-continuity` | Documentation alignment | After any spec or design change |
+| `ux-stitch` | UX design analysis | When UI designs are ready (Stitch MCP or file-based) |
+| `qa-audit-controls` | UAT and audit readiness | UAT planning, evidence matrix, controls review |
+
+**Role boundary rule:** Orchestrator owns flow, traceability, and completion control.
+Specialists provide expert output but do not own global task closure.
 
 ---
 
 ## Key Contacts and Roles
-*(To be completed by project lead — see `docs/governance/assumptions-register.md` for current placeholder.)*
+
+*(To be completed by project lead — see `docs/governance/assumptions-register.md`)*
 
 | Role | Responsibility |
 |------|---------------|
 | IFRS 16 Accountant | Validates accounting conclusions, approves calculation rules |
 | SAP RE Functional Consultant | Validates RE/RE-FX process mapping |
-| ABAP Architect | Reviews technical design, transports, and Z-object strategy |
-| Project Governance Lead | Approves ADRs, manages risk register |
-| AI/Kiro Practitioner | Manages agent configuration and RAG curation |
+| ABAP Architect | Reviews technical design, transports, Z-object strategy |
+| Project Governance Lead | Approves ADRs, manages risk register, gates phases |
+| AI/Kiro Practitioner | Manages Kiro IDE workspace, agent configuration, RAG curation |
 
 ---
 
 ## Standards and Governance
+
 - All significant decisions must be recorded in `docs/governance/decision-log.md`.
-- No ABAP code is created without a corresponding technical spec in `specs/` and a completed design section in `docs/technical/master-technical-design.md`.
-- AI agents must never produce accounting conclusions without human validation. See `AGENTS.md` and `.kiro/steering/ai-governance.md`.
-- All documentation is treated as living — updates are mandatory when specs change.
+- No ABAP code is created without a corresponding technical spec and completed design section.
+- AI agents must never produce accounting conclusions without human validation. See `AGENTS.md`.
+- All documentation is living — updates are mandatory when specs change.
+- No auto-commit or auto-push automation is permitted. All git operations require explicit
+  human action. See `.claude/settings.json` for the cleaned safe hook configuration.
+- ECC-specific design choices are flagged `[ECC-SPECIFIC]` for S/4HANA migration review.
