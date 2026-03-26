@@ -3,6 +3,7 @@
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 0.1 | 2026-03-24 | Bootstrap | Initial assumptions register |
+| 0.2 | 2026-03-26 | Project Governance Lead | Added A-19 to A-24 (Option B normalization); updated A-07/A-08 to reflect Option B context |
 
 ---
 
@@ -29,8 +30,8 @@ An assumption is something the project accepts as true without formal confirmati
 | A-04 | ABAP version 7.4 or higher is available on the ECC system | Lower ABAP versions restrict OO syntax and newer language features | ABAP Architect | **Unvalidated** | Target: Phase 0 T0-03 | Confirm with Basis team |
 | A-05 | SAP transport system (CTS) is active; Z objects can be assigned to dedicated packages | Transport strategy invalid if packaging restrictions apply | Basis Team | **Unvalidated** | Target: Phase 0 T0-03 | Confirm with Basis team |
 | A-06 | SAP Application Log (SLG1 / BAL_* function modules) is available and not restricted | Logging architecture must be redesigned if SLG1 is unavailable | Basis Team | **Unvalidated** | Target: Phase 0 T0-03 | Confirm SLG1 log object creation is permitted |
-| A-07 | RE-FX condition types are configured to reflect payment types that can be classified as IFRS 16 lease payments | If condition types do not distinguish payment types, additional configuration or Z mapping is required | SAP RE Functional Consultant | **Unvalidated** | Target: Phase 0 T0-02 | This is a key input to the field mapping |
-| A-08 | RE-FX option date fields (extension, termination, purchase) are populated for all relevant contracts | If option dates are not in RE-FX, the lease term wizard cannot auto-populate; manual entry required | SAP RE Functional Consultant | **Unvalidated** | Target: Phase 0 T0-02 | Data quality assessment required |
+| A-07 | **[OPTION B CONTEXT]** If existing RE-FX contracts are migrated, RE-FX condition types can be read during the one-time migration extract to classify payment types. This is a migration-only read; RE-FX is NOT used at runtime. | If condition types cannot be mapped during migration, manual classification is required for migrated contracts | SAP RE Functional Consultant | **Unvalidated** | Target: Phase 0 T0-02 | Migration read-only; not a runtime dependency per ADR-006 |
+| A-08 | **[OPTION B CONTEXT]** If existing RE-FX contracts are migrated, RE-FX option date fields can be read during the one-time migration extract. Z contract master will store option dates explicitly. This is a migration-only read; RE-FX is NOT used at runtime. | If option dates are not in RE-FX, manual entry is required during migration intake | SAP RE Functional Consultant | **Unvalidated** | Target: Phase 0 T0-02 | Migration read-only; not a runtime dependency per ADR-006 |
 
 ### B: Accounting Policy Assumptions
 
@@ -54,6 +55,19 @@ An assumption is something the project accepts as true without formal confirmati
 
 ---
 
+## D: Option B Architecture Assumptions
+
+| ID | Assumption | Impact If Wrong | Owner | Status | Validation Date | Notes |
+|----|-----------|----------------|-------|--------|----------------|-------|
+| A-19 | All Z tables required for the Option B contract master (ZRIF16_CONTRACT, ZRIF16_PAYMENT_SCHED, ZRIF16_LEASEOBJ, etc.) can be created in the client's SAP system without namespace conflicts | Z table naming must be revised; transport strategy must be updated | ABAP Architect | **Unvalidated** | Target: Phase 0 T0-03 | Linked to OQ-ABAP-01; confirm with Basis team |
+| A-20 | Standard SAP FI BAPIs (e.g., BAPI_ACC_DOCUMENT_POST) are available and sufficient for all IFRS 16 FI-GL posting scenarios required by the addon | Custom FM or alternative posting approach required; significant ABAP rework | FI Architect + ABAP Architect | **Unvalidated** | Target: Phase 0 T0-04 | Linked to OQ-FI-02; critical for CD-04 design |
+| A-21 | Standard SAP FI-AA BAPIs are available and sufficient for ROU asset creation and depreciation activation without RE-FX intermediary | Custom FI-AA integration required; significant ABAP rework | FI-AA Specialist + ABAP Architect | **Unvalidated** | Target: Phase 0 T0-04 | Linked to OQ-FI-05; critical for CD-05 design |
+| A-22 | The client does NOT have existing RE-FX contracts that require migration, OR the migration scope is manageable within Phase 0/Phase 1 timeline | Migration program becomes a separate project; Phase 1 timeline extends significantly | Project Governance Lead + SAP RE Functional Consultant | **Unvalidated** | Target: Phase 0 T0-02 | Linked to OQ-CM-06; critical path item |
+| A-23 | The Option B Z addon can be deployed as a standalone package without modifying any SAP standard objects or requiring SAP Note application | Standard object modification required; Basis team involvement; transport risk | ABAP Architect | **Unvalidated** | Target: Phase 0 T0-03 | Core Option B principle; must be validated early |
+| A-24 | The client's SAP ECC system has sufficient technical capacity (dialog work processes, background work processes, database performance) to support the Z addon's period-end batch processing requirements | Performance tuning or infrastructure upgrade required; delays Phase 1 go-live | ABAP Architect + SAP Basis | **Unvalidated** | Target: Phase 0 T0-03 | Linked to R-07 (performance risk) |
+
+---
+
 ## Validated Assumptions
 *(None confirmed yet — all validations pending Phase 0)*
 
@@ -67,5 +81,10 @@ An assumption is something the project accepts as true without formal confirmati
 ## Next Actions
 1. Project Governance Lead: schedule Phase 0 T0-01 (accounting policy workshop) immediately.
 2. Project Governance Lead: confirm resource availability for IFRS 16 Accountant and SAP RE Functional Consultant.
-3. ABAP Architect: confirm SAP landscape details (A-04, A-05, A-06) with Basis team.
-4. SAP RE Functional Consultant: initiate data quality assessment to validate A-08, A-18.
+3. ABAP Architect: confirm SAP landscape details (A-04, A-05, A-06, A-19, A-23, A-24) with Basis team.
+4. SAP RE Functional Consultant: initiate data quality assessment to validate A-08, A-18, A-22.
+5. FI Architect + ABAP Architect: confirm BAPI availability (A-20, A-21) in T0-04 workshop.
+
+---
+
+*Traceability: specs/000-master-ifrs16-addon/requirements.md | docs/governance/decision-log.md — ADR-006 | Last updated: 2026-03-26 | Updated by: Project Governance Lead (reconciliation pass)*

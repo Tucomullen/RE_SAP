@@ -4,6 +4,7 @@
 |---------|------|--------|---------|
 | 0.1 | 2026-03-24 | Bootstrap | Initial risk register |
 | 0.2 | 2026-03-24 | Remediation | Added pain-point-derived operational risks R-13 to R-22 |
+| 0.3 | 2026-03-26 | Project Governance Lead | Added Option B architecture risks R-23 to R-26; updated R-01 to reflect Option B context |
 
 ---
 
@@ -19,7 +20,7 @@
 
 | ID | Category | Risk Description | Likelihood | Impact | Score | Rating | Mitigation | Owner | Status | Last Reviewed |
 |----|----------|-----------------|-----------|--------|-------|--------|-----------|-------|--------|--------------|
-| R-01 | Functional | RE-FX condition type mapping is more complex than anticipated — payment classification requires extensive analysis and configuration study | 4 | 4 | 16 | **HIGH** | Schedule dedicated blueprint workshop with SAP RE Functional Consultant in Phase 0. Do not start calculation engine design until mapping is confirmed. | SAP RE Functional Consultant | Open | 2026-03-24 |
+| R-01 | Functional | **[OPTION B CONTEXT]** RE-FX data quality for migration extract is poor — payment classification, option dates, and contract attributes require extensive manual remediation before Z table load | 4 | 4 | 16 | **HIGH** | Schedule dedicated T0-02 blueprint workshop. Data quality assessment is a Phase 0 gate. Migration scope must be confirmed before Phase 1 begins. | SAP RE Functional Consultant | Open | 2026-03-26 |
 | R-02 | Dependency | IBR/discount rate determination process not established — blocks calculation engine testing and initial measurements | 3 | 4 | 12 | **MEDIUM** | Flag as Critical Dependency D-03. Escalate to Finance team immediately. Phase 1 cannot complete without this. | IFRS 16 Accountant | Open | 2026-03-24 |
 | R-03 | Technical | ABAP landscape constraints (ABAP version < 7.4, restrictive transport policies) limit design choices | 2 | 4 | 8 | **MEDIUM** | Confirm ABAP version and transport landscape in Phase 0 (T0-03). Design after confirmation. | ABAP Architect | Open | 2026-03-24 |
 | R-04 | Accounting | IFRS 16 accounting policy elections not formally decided — blocks scope determination rules and calculation parameters | 4 | 5 | 20 | **CRITICAL** | Block Phase 1 design until T0-01 is complete. Engage IFRS 16 Accountant immediately to schedule policy sign-off. | IFRS 16 Accountant | Open | 2026-03-24 |
@@ -45,6 +46,19 @@
 
 ---
 
+## Option B Architecture Risks (R-23 to R-26)
+
+> These risks are specific to the Option B standalone Z addon architecture (ADR-006). They must be reviewed at every phase gate.
+
+| ID | Category | Risk Description | Likelihood | Impact | Score | Rating | Mitigation | Owner | Status | Last Reviewed |
+|----|----------|-----------------|-----------|--------|-------|--------|-----------|-------|--------|--------------|
+| R-23 | Architecture | FI BAPI coverage gap — standard SAP FI BAPIs (BAPI_ACC_DOCUMENT_POST or equivalent) do not support all IFRS 16 posting scenarios required by the addon (e.g., multi-ledger, document splitting edge cases) | 3 | 5 | 15 | **HIGH** | Confirm BAPI coverage in T0-04 workshop (OQ-FI-02). Design FI posting interface (ZIF_RIF16_POSTING_HANDLER) to allow alternative posting FM if BAPI is insufficient. Do not start CD-04 ABAP development until confirmed. | FI Architect + ABAP Architect | Open | 2026-03-26 |
+| R-24 | Architecture | FI-AA BAPI coverage gap — standard FI-AA BAPIs do not support ROU sub-asset creation or depreciation activation in the required manner, forcing a custom posting approach | 3 | 4 | 12 | **MEDIUM** | Confirm FI-AA BAPI availability in T0-04 workshop (OQ-FI-05). Design FI-AA interface (ZIF_RIF16_ASSET_HANDLER) to allow alternative approach. Prototype in Phase 0 sandbox. | FI-AA Specialist + ABAP Architect | Open | 2026-03-26 |
+| R-25 | Architecture | Option B scope creep — stakeholders request RE-FX runtime integration after ADR-006 is accepted, creating pressure to reintroduce RE-FX dependencies and violate Option B governance rules | 3 | 4 | 12 | **MEDIUM** | ADR-006 is non-negotiable. Any RE-FX runtime integration request must be escalated to Project Governance Lead and assessed against OB-01 to OB-10 rules. The `option-b-architecture-guard` hook enforces this automatically. | Project Governance Lead | Open | 2026-03-26 |
+| R-26 | Migration | Migration program underestimated — if the client has a large RE-FX contract portfolio, the one-time migration extract, validation, and Z table load may require a separate project track that delays Phase 1 go-live | 3 | 4 | 12 | **MEDIUM** | Confirm migration scope in T0-02 (OQ-CM-06). If migration scope is large, create a dedicated migration workstream with its own timeline. Do not allow migration complexity to delay Phase 1 core engine delivery. | Project Governance Lead + SAP RE Functional Consultant | Open | 2026-03-26 |
+
+---
+
 ## Risk Escalation Thresholds
 - **CRITICAL (20–25):** Immediate escalation to Project Governance Lead. Work on dependent tasks is blocked until risk is mitigated or formally accepted.
 - **HIGH (13–19):** Mitigation plan required before end of current phase. Owner reviews weekly.
@@ -58,7 +72,8 @@
 | ID | Risk | Immediate Action Required |
 |----|------|--------------------------|
 | R-04 | Accounting policy elections not decided | **IMMEDIATE:** Schedule accounting policy workshop with IFRS 16 Accountant. Block Phase 1 design start. |
-| R-01 | RE-FX mapping complexity | **Phase 0 Priority:** Schedule blueprint workshop (T0-02). |
+| R-01 | RE-FX data quality for migration extract | **Phase 0 Priority:** Schedule T0-02 blueprint workshop. Data quality assessment is a Phase 0 gate. |
+| R-23 | FI BAPI coverage gap | **Phase 0 Priority:** Confirm BAPI coverage in T0-04. Do not start CD-04 ABAP development until confirmed. |
 | R-13 | Contract configuration errors reach calculation engine | **Phase 1 Priority:** Implement pre-flight validation at contract intake (Epic 10, US-10.1). |
 | R-15 | ZRE009 reclassification blocked at period-end | **Phase 1 Priority:** Implement ZRE009 pre-flight checklist (Epic 10, US-10.3). |
 | R-16 | Unvaluated changes cause silent batch failures | **Phase 1 Priority:** Implement pre-batch valuation check (Epic 10, US-10.5). |

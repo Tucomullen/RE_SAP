@@ -117,14 +117,18 @@ All Z tables include mandatory system fields: `MANDT`, `CREATED_BY`, `CREATED_AT
 
 ## 4. Integration Design
 
-### 4.1 RE/RE-FX Data Reading
-- **Approach:** Z data provider class (`ZCL_RIF16_CONTRACT_DATA`) wraps all RE-FX reads.
-- **Tables accessed:** [TO BE CONFIRMED with SAP RE Functional Consultant — specific RE-FX tables]
-- **Data extracted:** Contract header, condition records, option dates, partner data, cash flow projections.
-- **S/4 migration note:** When S/4HANA is adopted, only the data provider class implementation needs to change — business logic remains unaffected.
-- **Error handling:** If RE-FX data is incomplete, `ZCX_RIF16_DATA_ERROR` is raised with specific field identification.
+### 4.1 RE-FX Migration Extract (One-Time Only — Option B)
 
-`[ECC-SPECIFIC: RE-FX table names and reading approach may change in S/4HANA RE-FX — review for S/4 migration]`
+> **OPTION B MANDATE (ADR-006):** RE-FX is NOT a runtime data source. The Z addon reads exclusively from Z tables at runtime. The section below describes the one-time migration extract only — not an ongoing integration.
+
+- **Approach:** One-time migration program reads RE-FX source tables into `ZRIF16_MIGRATION_STAGING`. After load and validation, Z contract master tables are populated. RE-FX is not read again after go-live.
+- **Migration data quality risk (R-01 — HIGH):** RE-FX data quality for the migration extract may be poor — payment classification, option dates, and contract attributes may require manual remediation before Z table load. Data quality assessment is a **Phase 0 gate** (T0-02 workshop). Migration scope must be confirmed before Phase 1 design begins.
+- **Tables read (migration only):** [TO BE CONFIRMED with SAP RE Functional Consultant at T0-02 — specific RE-FX source tables for migration extract]
+- **Data extracted (migration only):** Contract header, condition records, option dates, partner data.
+- **Runtime data provider:** `ZCL_RIF16_CONTRACT_DATA` reads exclusively from Z tables (`ZRIF16_CONTRACT`, `ZRIF16_PAYMENT_SCHED`, `ZRIF16_LEASEOBJ`) at runtime. No RE-FX dependency after migration.
+- **Error handling:** If migration source data is incomplete, migration staging record is flagged with `STATUS = ERROR` and excluded from Z load until manually remediated.
+
+`[ECC-SPECIFIC: RE-FX source table names for migration extract must be confirmed at T0-02 — review for S/4 migration if client migrates to S/4 before go-live]`
 
 ### 4.2 FI-GL Posting
 - **Approach:** [TO BE CONFIRMED — options: BAPI_ACC_DOCUMENT_POST, standard accounting interface, or Z FM wrapper]
@@ -222,7 +226,7 @@ All Z tables include mandatory system fields: `MANDT`, `CREATED_BY`, `CREATED_AT
 
 | Z Object | ECC-Specific Risk | Migration Path |
 |----------|-------------------|---------------|
-| ZCL_RIF16_CONTRACT_DATA | Reads ECC RE-FX tables | Replace with S/4 RE-FX data provider implementation — same interface |
+| ZCL_RIF16_CONTRACT_DATA | Reads Z tables at runtime (no RE-FX runtime dependency under Option B); migration extract reads RE-FX source tables one-time only | Replace migration extract implementation for S/4 source tables if needed — runtime class unaffected |
 | ZRIF16_SCHED | ECC table design — compatible | Assess if S/4HANA IFRS 16 standard functionality supersedes this table |
 | ZCL_RIF16_POSTING | Uses ECC posting FM | Replace with S/4 accounting API if available |
 | All Z transactions | ALV-based — ECC UI | Plan Fiori equivalent for S/4 — not built in v1 |

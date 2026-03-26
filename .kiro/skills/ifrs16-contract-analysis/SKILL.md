@@ -126,6 +126,6 @@ Flag any such indicators for immediate escalation.
 ## Handoff to Next Role/Agent
 
 - **IFRS 16 Accountant (Human):** Review and validate the scoping memo, lease term proposal, and payment classifications. Provide discount rate. Sign off on the data capture checklist.
-- **SAP RE/RE-FX Specialist Agent (sap-re-ifrs16):** Use the data capture checklist to verify which fields exist in RE-FX and which require Z extension fields.
+- **SAP ECC Coverage Analyst Agent (ecc-coverage-analyst):** Use the data capture checklist to verify which capabilities exist in the current ECC solution and which require new Z design. Confirm Option B coverage for the contract type being analyzed.
 - **RAG Knowledge Curator (rag-knowledge):** If new IFRS 16 interpretation insights emerge, propose them for addition to knowledge/official-ifrs/.
 - **Functional Spec Writer (functional-spec-writer):** Use the validated output to update or create the contract intake functional spec.
