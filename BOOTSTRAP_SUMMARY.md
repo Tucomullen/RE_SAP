@@ -84,7 +84,7 @@ Este workspace fue inicializado con **42 archivos** organizados en la siguiente 
 |------|------|
 | `orchestrator-ifrs16.json` | Program owner — controls the full delivery process |
 | `ifrs16-domain.json` | IFRS 16 accounting domain specialist |
-| `sap-re-ifrs16.json` | SAP RE/RE-FX process and object mapping specialist |
+| `ecc-coverage-analyst.json` | ECC business coverage preservation analyst (replaces `sap-re-ifrs16` under Option B — ADR-006) |
 | `abap-architecture.json` | Technical architecture and Z object design specialist |
 | `rag-knowledge.json` | Knowledge base curation and source hierarchy enforcement |
 | `docs-continuity.json` | Living documentation alignment and changelog |
@@ -220,7 +220,7 @@ The **Orchestrator Agent** (`orchestrator-ifrs16`) is your primary entry point f
 ### Engaging Specialist Agents
 The orchestrator will direct you to specialist agents when needed. You can also engage them directly:
 - **IFRS 16 accounting question** → `ifrs16-domain` agent
-- **RE-FX process mapping** → `sap-re-ifrs16` agent
+- **ECC coverage / business functionality question** → `ecc-coverage-analyst` agent
 - **Technical design question** → `abap-architecture` agent
 - **Knowledge base health** → `rag-knowledge` agent
 - **Documentation alignment** → `docs-continuity` agent
@@ -243,7 +243,7 @@ Context → Output → Open Items (assumptions/questions/risks/dependencies)
 
 **Priority actions:**
 1. **Human:** Schedule and run accounting policy workshop (T0-01). Output: signed policy document in `knowledge/project-decisions/`.
-2. **Human + sap-re-ifrs16 agent:** Run RE-FX blueprint workshop (T0-02). Output: field mapping in `knowledge/sap-functional/`.
+2. **Human + ecc-coverage-analyst agent:** Run Option B blueprint workshop (T0-02). Output: coverage analysis in `docs/architecture/T0-02-option-b-blueprint.md`; migration scope confirmed.
 3. **Human:** Confirm ABAP landscape (T0-03). Output: updated `docs/governance/assumptions-register.md`.
 4. **Human + orchestrator:** Review and approve ADR-001 to ADR-005 (T0-07). Output: ADRs moved to Accepted in `docs/governance/decision-log.md` and full ADR files in `knowledge/project-decisions/`.
 5. **rag-knowledge agent:** Run knowledge base health check. Output: gap list for official IFRS sources.

@@ -5,6 +5,7 @@ This log records all significant architectural, functional, and governance decis
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 0.1 | 2026-03-24 | Bootstrap | Initial decision log — first 5 ADRs proposed |
+| 0.2 | 2026-03-26 | Project Governance Lead | Added ADR-006 (Option B — ACCEPTED); added Critical Path Dependencies section; updated index |
 
 ---
 
@@ -205,6 +206,22 @@ All Z development follows S/4HANA compatibility rules:
 - Slight development overhead for interface abstraction.
 - Phase 3 S/4 compatibility assessment will be streamlined because of this design discipline.
 - Migration path for every Z table must be documented.
+
+---
+
+## Critical Path Dependencies
+
+> These dependencies are blocking constraints. No phase may proceed until the dependency is resolved. Each dependency is linked to the open questions and risks it unblocks.
+
+| ID | Dependency | Blocks | Owner | Target Resolution | Status | Linked OQ | Linked Risk |
+|----|-----------|--------|-------|------------------|--------|-----------|------------|
+| D-PHASE-01 | IFRS 16 accounting policy formally signed off (T0-01 complete) | All Phase 1 functional design; ADR-004 approval; CD-03 / CD-04 design | IFRS 16 Accountant | T0-01 Workshop | OPEN | OQ-ACC-01, OQ-ACC-02, OQ-ACC-03, OQ-ACC-04, OQ-ACC-05 | R-04 |
+| D-PHASE-02 | SAP technical landscape confirmed (T0-03 complete) — ABAP version, namespace, transport, SLG1 | All Z object creation; ADR-001, ADR-002, ADR-003 approval | ABAP Architect + SAP Basis | T0-03 Workshop | OPEN | OQ-ABAP-01, OQ-ABAP-06, OQ-ABAP-07 | R-03, R-23 |
+| D-PHASE-03 | IBR / discount rate determination process established | CD-03 calculation engine testing; initial measurements for any contract | IFRS 16 Accountant + Treasury | T0-01 Workshop | OPEN | OQ-ACC-03 | R-02 |
+| D-PHASE-04 | FI-GL and FI-AA BAPI coverage confirmed (T0-04 complete) | CD-04 and CD-05 ABAP development; ADR-003 approval | FI Architect + FI-AA Specialist + ABAP Architect | T0-04 Workshop | OPEN | OQ-FI-01, OQ-FI-02, OQ-FI-05 | R-23, R-24 |
+| D-PHASE-05 | Data governance / legal review initiated for AI service integration | Phase 3 AI assistant (T3-01); Epic 7 delivery | Legal/DGO + Project Governance Lead | Phase 1 start | OPEN | TBC-ORK-06 | R-06, R-10 |
+
+> **Rule:** No task in Phase 1 may be marked In Progress if its blocking dependency is still OPEN. The orchestrator enforces this at every pipeline stage.
 
 ---
 

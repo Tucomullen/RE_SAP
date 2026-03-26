@@ -1,9 +1,10 @@
-# Master Task Backlog — IFRS 16 Z Addon for SAP RE/RE-FX
+# Master Task Backlog — IFRS 16 Z Addon for SAP ECC (Option B)
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 0.1 | 2026-03-24 | Bootstrap | Initial phased backlog |
 | 0.2 | 2026-03-24 | Remediation | Added Phase 1F (pain point mitigation tasks T1-21 to T1-31) and Phase 2 pain point continuations |
+| 0.3 | 2026-03-26 | Project Governance Lead | Option B normalization: updated T0-02, T1-01, T1-12, T2-01 to reflect Z standalone architecture (ADR-006); removed RE-FX runtime references |
 
 ---
 
@@ -33,7 +34,7 @@ Tasks are organized by phase. Each task has: ID, title, description, dependencie
 | Task ID | Title | Description | Dependencies | Owner | Done Criteria | Doc Update | QA Gate |
 |---------|-------|-------------|--------------|-------|--------------|------------|---------|
 | T0-01 | IFRS 16 accounting policy sign-off | Document client's accounting policy elections: short-term exemption by asset class, low-value threshold, IBR source, non-lease component policy | None | HUM-ACC | Policy document signed off, stored in knowledge/project-decisions/ | docs/governance/assumptions-register.md updated | HUM-GOV review |
-| T0-02 | SAP RE-FX blueprint workshop | Run workshop with SAP RE Functional Consultant to map all IFRS 16 data requirements to RE-FX fields; identify gaps requiring Z extension | None | HUM-RE + AGT-RE | Field mapping document complete in knowledge/sap-functional/; all TBC items in design.md resolved or escalated | knowledge/sap-functional/ updated | HUM-GOV review |
+| T0-02 | Option B blueprint and ECC coverage workshop | **[OPTION B]** Run workshop with SAP RE Functional Consultant and ECC Coverage Analyst to: (1) confirm all current ECC capabilities are covered by CD-01 to CD-09; (2) confirm migration scope if RE-FX contracts exist; (3) resolve OQ-COV-01 to OQ-COV-08 from T0-02-coverage-gaps-matrix.md; (4) obtain sign-off on T0-02-option-b-blueprint.md | None | HUM-RE + AGT-ECC | Blueprint document signed off; all OQ-COV items resolved or escalated; migration scope confirmed | knowledge/sap-functional/ updated; docs/architecture/T0-02-option-b-blueprint.md signed | HUM-GOV review |
 | T0-03 | Technical landscape confirmation | Confirm ABAP version, transport landscape, package naming, authorization framework, SLG1 availability | None | HUM-ABAP + HUM-SEC | All A-0x assumptions in requirements.md marked Confirmed or Rejected | docs/governance/assumptions-register.md updated | HUM-GOV review |
 | T0-04 | FI-GL/FI-AA posting approach decision | Confirm whether IFRS 16 postings go to main ledger, parallel ledger, or extension ledger; confirm FI-AA approach for ROU assets | T0-01 | HUM-ACC + FI Architect | ADR recorded in docs/governance/decision-log.md; design.md §8 updated | docs/governance/decision-log.md, design.md | HUM-GOV |
 | T0-05 | Populate official IFRS knowledge base | Add IFRS 16 standard text, basis for conclusions, and key IFRIC agenda decisions to knowledge/official-ifrs/ with full metadata | None | AGT-RAG + HUM-ACC (validation) | All Priority 1-2 sources have validated-by human name; README.md updated | knowledge/official-ifrs/README.md | AGT-RAG health check |
@@ -50,7 +51,7 @@ Tasks are organized by phase. Each task has: ID, title, description, dependencie
 
 | Task ID | Title | Description | Dependencies | Owner | Done Criteria | Doc Update | QA Gate |
 |---------|-------|-------------|--------------|-------|--------------|------------|---------|
-| T1-01 | Z data model design — contract extension | Design ZRIF16_CNTRT and all related extension tables; field list, keys, indexes, change documents | T0-02, T0-03, T0-07 | AGT-ABAP + HUM-ABAP | Technical design document complete and approved by ABAP Architect | docs/technical/master-technical-design.md updated | HUM-ABAP review |
+| T1-01 | Z data model design — contract master | **[OPTION B]** Design ZRIF16_CONTRACT and all related Z tables (ZRIF16_PAYMENT_SCHED, ZRIF16_LEASEOBJ, etc.); field list, keys, indexes, change documents. No RE-FX table foreign keys. All contract data is self-owned in Z. | T0-02, T0-03, T0-07 | AGT-ABAP + HUM-ABAP | Technical design document complete and approved by ABAP Architect; OB-01 and OB-05 compliance confirmed | docs/technical/master-technical-design.md updated | HUM-ABAP review |
 | T1-02 | Z data model design — calculation tables | Design ZRIF16_CALC, ZRIF16_CALCI, ZRIF16_SCHED | T1-01 | AGT-ABAP + HUM-ABAP | Technical design approved | docs/technical updated | HUM-ABAP review |
 | T1-03 | Z data model design — parameters and audit | Design ZRIF16_PARAM, ZRIF16_AUDIT, SLG1 log object definition | T1-01 | AGT-ABAP + HUM-ABAP | Technical design approved | docs/technical updated | HUM-ABAP review |
 | T1-04 | Z table creation in DEV | Create approved Z tables in SAP DEV with transports | T1-01, T1-02, T1-03 | HUM-ABAP | Tables active in DEV; transport released to QA; regression test passed | docs/technical: object catalog updated | AGT-QA regression check |
@@ -71,7 +72,7 @@ Tasks are organized by phase. Each task has: ID, title, description, dependencie
 |---------|-------|-------------|--------------|-------|--------------|------------|---------|
 | T1-10 | Functional spec — contract intake wizard | Write functional spec for guided data capture transaction ZRE_IFRS16_INTAKE | T0-02, T1-01 | AGT-RE + HUM-RE | Signed off by RE Consultant | docs/functional updated | HUM-RE + HUM-ACC |
 | T1-11 | UX design — intake wizard | Design intake wizard screens (field layout, progress steps, validation messages) | T1-10 | AGT-UX | Design reviewed by RE Contract Manager persona and Lease Accountant persona | knowledge/ux-stitch/ updated | HUM (target persona review) |
-| T1-12 | ABAP development — intake transaction | Implement ZRE_IFRS16_INTAKE with RE-FX data pre-population and Z table write | T1-10, T1-11, T1-04 | HUM-ABAP | Transaction executable; pre-population from RE-FX working; Z table entries created correctly | docs/user updated; docs/technical updated | AGT-QA UAT scenarios T1 |
+| T1-12 | ABAP development — intake transaction | **[OPTION B]** Implement ZRE_IFRS16_INTAKE as a Z standalone transaction. Contract data is entered directly into Z tables. If a migration extract exists, pre-population from the migration staging table (ZRIF16_MIGRATION_STAGING) is supported. No runtime RE-FX data reads. | T1-10, T1-11, T1-04 | HUM-ABAP | Transaction executable; Z table entries created correctly; no RE-FX runtime dependency | docs/user updated; docs/technical updated | AGT-QA UAT scenarios T1 |
 
 ### P1-D: Period-End Batch and Posting
 
@@ -118,7 +119,7 @@ Tasks are organized by phase. Each task has: ID, title, description, dependencie
 
 | Task ID | Title | Description | Dependencies | Owner | Done Criteria | Doc Update | QA Gate |
 |---------|-------|-------------|--------------|-------|--------------|------------|---------|
-| T2-01 | Functional spec — modification detection | Spec for detecting RE-FX change events that constitute IFRS 16 modifications | T1-12, Phase 1 complete | AGT-DOM + AGT-RE + HUM-RE | Signed off | docs/functional updated | HUM-ACC + HUM-RE |
+| T2-01 | Functional spec — modification detection | **[OPTION B]** Spec for detecting Z contract events (from ZRIF16_EVENT table) that constitute IFRS 16 modifications. Events are generated by the Z contract event engine (CD-06), not by RE-FX change events. | T1-12, Phase 1 complete | AGT-DOM + AGT-ECC + HUM-RE | Signed off; event types defined in Z event model | docs/functional updated | HUM-ACC + HUM-RE |
 | T2-02 | Functional spec — modification wizard | Spec for classification wizard: new separate lease vs. adjustment | T2-01 | AGT-DOM + HUM-ACC | Signed off with all IFRS 16 paragraph references | docs/functional updated | HUM-ACC |
 | T2-03 | ABAP development — modification module | Implement ZRIF16_MODF, detection logic, classification wizard, delta display | T2-01, T2-02 | HUM-ABAP | Wizard operational; pre-modification snapshot saved; delta table correct | docs/technical + docs/user updated | AGT-QA UAT-MOD scenarios |
 | T2-04 | Functional spec — remeasurement | Spec for all remeasurement triggers (D-G per IFRS 16 classification) | T2-01 | AGT-DOM + HUM-ACC | Signed off | docs/functional updated | HUM-ACC |
