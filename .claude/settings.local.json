@@ -25,7 +25,8 @@
       "Bash(ls -la /c/Users/xlgarcia/projects/RE_SAP/*.md /c/Users/xlgarcia/projects/RE_SAP/*.json)",
       "Bash(python3 -c \":*)",
       "Bash(powershell -Command \"Get-Command pwsh\")",
-      "Bash(powershell -Command \"Write-Output ''ps works''\")"
+      "Bash(powershell -Command \"Write-Output ''ps works''\")",
+      "Bash(find /c/Users/xlgarcia/projects/RE_SAP -type d -not -path */node_modules/*)"
     ]
   }
 }

@@ -1,0 +1,33 @@
+name: capability-coverage-check
+description: Ensures every new feature or requirement in a spec file is tagged to at least one of the 9 capability domains (CD-01 to CD-09). Prevents unclassified requirements that cannot be traced to a domain.
+when:
+  type: fileEdited
+  patterns:
+    - "specs/**/requirements.md"
+then:
+  type: askAgent
+  prompt: |
+    A requirements spec was just saved: {{file}}
+
+    Perform the Capability Domain Coverage Check.
+
+    The 9 capability domains are:
+    CD-01: Contract Master Z
+    CD-02: Lease Object Master Z
+    CD-03: Valuation Engine Z
+    CD-04: Accounting Engine Z (FI-GL)
+    CD-05: Asset Engine Z (FI-AA)
+    CD-06: Contract Event Engine Z
+    CD-07: Procurement / Source Integration Z
+    CD-08: Reclassification Engine Z
+    CD-09: Reporting and Audit Z
+
+    CHECK:
+    1. For each user story (US-X.X format) in the file, determine if it has a capability domain tag (CD-0x).
+    2. For any user story that does NOT have a capability domain tag, identify which domain(s) it logically belongs to based on its description.
+    3. Report all untagged stories with a recommended domain assignment.
+
+    OUTPUT:
+    - If all stories are tagged: output exactly "Capability coverage check: PASSED — all stories tagged to capability domains."
+    - If untagged stories found: list each untagged story ID with recommended domain assignment.
+    Do not elaborate beyond identifying the gaps and recommending assignments.

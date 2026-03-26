@@ -1,0 +1,40 @@
+name: open-questions-register-check
+description: Scans for [TO BE CONFIRMED] and [TBC] markers in saved files and ensures each has a corresponding registered entry in docs/architecture/open-questions-register.md with a priority and owner. Enforces OB-09 — no silent open questions.
+when:
+  type: fileEdited
+  patterns:
+    - "specs/**/*.md"
+    - "docs/architecture/*.md"
+    - "docs/technical/*.md"
+    - ".kiro/steering/*.md"
+then:
+  type: askAgent
+  prompt: |
+    A project file was just saved: {{file}}
+
+    Perform the Open Questions Register Check.
+
+    RULE OB-09: No open architecture or accounting question may be silently ignored. Every [TO BE CONFIRMED] or [TBC] marker must have a registered entry in docs/architecture/open-questions-register.md with a priority (P0-P3) and an owner.
+
+    STEP 1 — SCAN THE SAVED FILE
+    Find all occurrences of:
+    - "[TO BE CONFIRMED"
+    - "[TBC"
+    - "to be confirmed"
+    - "must be confirmed"
+    - "pending confirmation"
+    - "open question"
+    List each one with its surrounding context (the sentence it appears in).
+
+    STEP 2 — CHECK REGISTRATION
+    For each item found, determine if it already has a corresponding entry in docs/architecture/open-questions-register.md.
+    An item is considered registered if: a matching OQ-* entry exists with a priority level and an owner name.
+
+    STEP 3 — REPORT
+    OUTPUT:
+    - If no [TO BE CONFIRMED] / [TBC] items found: output exactly "Open questions register check: PASSED — no unregistered open items."
+    - If all items are already registered: output exactly "Open questions register check: PASSED — all open items registered."
+    - If unregistered items found: output "Open questions register check: ACTION REQUIRED" followed by:
+      - The unregistered text (quoted from the file)
+      - A recommended OQ-* entry to add to open-questions-register.md (including suggested priority P0-P3 and suggested owner)
+    Do not elaborate beyond what is needed to identify the gaps.

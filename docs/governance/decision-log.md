@@ -12,13 +12,15 @@ This log records all significant architectural, functional, and governance decis
 
 | ADR | Date | Status | Title | Area |
 |-----|------|--------|-------|------|
+| ADR-006 | 2026-03-26 | **ACCEPTED** | Option B — Z addon fully replaces SAP RE-FX as system of record | Architecture |
 | ADR-001 | 2026-03-24 | Proposed | ABAP OO mandate for all Z development | Technical Architecture |
 | ADR-002 | 2026-03-24 | Proposed | Z object naming convention adoption | Development Standards |
 | ADR-003 | 2026-03-24 | Proposed | Application logging via SAP SLG1 + Z audit table | Auditability |
 | ADR-004 | 2026-03-24 | Proposed | Human approval gate mandatory before FI posting | Governance/Controls |
 | ADR-005 | 2026-03-24 | Proposed | S/4HANA compatibility by design — no deprecated ABAP | Technical Architecture |
 
-> All ADRs above are currently **Proposed**. They require Project Governance Lead review and approval to move to **Accepted**. Create full ADR files in `knowledge/project-decisions/` when approved.
+> **ADR-006 is ACCEPTED and immediately effective.** It overrides any prior design assumption about RE-FX as system of record.
+> ADR-001 through ADR-005 are still **Proposed**. They require Project Governance Lead review. Create full ADR files in `knowledge/project-decisions/` when approved.
 
 ---
 
@@ -45,6 +47,51 @@ All new Z ABAP development for the IFRS 16 addon will use ABAP Object-Oriented p
 - Enables unit testing via ABAP Unit.
 - Aligns with S/4HANA ABAP Cloud restrictions.
 - Slight learning curve for developers used to procedural ABAP.
+
+---
+
+## ADR-006: Option B — Z Addon Fully Replaces SAP RE-FX as System of Record
+
+**Date:** 2026-03-26
+**Status:** ACCEPTED — Effective immediately. Non-negotiable architectural constraint.
+**Owner:** Project Governance Lead
+**Supersedes:** All prior design assumptions about RE-FX as system of record
+
+### Context
+During architectural review on 2026-03-26, it was determined that:
+1. End users have strong UX objections to SAP RE-FX screens — complexity, lack of usability, poor adoption.
+2. The project owners require custom screens for both individual and mass lease contract creation.
+3. RE-FX as a backend (Option A) still creates runtime dependencies on RE-FX data structures, condition types, and event model, creating fragility and limiting UX freedom.
+4. Option B (Z addon as standalone system) eliminates all RE-FX runtime dependencies and enables full UX control, cleaner data model, and better S/4HANA compatibility.
+
+### Decision
+The RE-SAP IFRS 16 Addon will be built as a **standalone Z Lease Management System** under Option B:
+- All contract master data stored exclusively in Z tables.
+- All IFRS 16 valuation logic implemented in Z.
+- All FI-GL documents posted directly via standard FI BAPIs from Z logic.
+- All FI-AA ROU asset management executed via standard FI-AA BAPIs from Z logic.
+- No dependency on RE-FX as a system of record, processing engine, or accounting engine at runtime.
+- End users interact exclusively with Z workspace transactions — RE-FX user transactions are not used.
+
+### Alternatives Considered
+| Alternative | Why Rejected |
+|-------------|-------------|
+| Option A (RE-FX as backend, Z screens as front-end) | Creates ongoing RE-FX table structure dependency; condition type configuration overhead; RE-FX event model constraints; S/4 migration risk from RE-FX table changes |
+| Option C (Coexistence — new in Z, legacy in RE-FX) | Dual system complexity; reconciliation overhead; unclear system of record; ongoing RE-FX runtime dependency |
+
+### Consequences
+- RE-FX is not used at runtime after go-live (except one-time migration read-out if applicable).
+- Z tables must cover all contract master data, payment schedules, and object master data.
+- FI-GL and FI-AA integration must be validated via BAPIs directly.
+- A one-time migration program may be needed if existing contracts exist in RE-FX.
+- The `sap-re-ifrs16` agent is repurposed as `ecc-coverage-analyst` — its mission is now preserving business coverage, not mapping to RE-FX objects.
+- New steering file `option-b-target-model.md` is the authoritative constraint document.
+- See full Option B design in `docs/architecture/option-b-architecture.md`.
+
+### Governance Impact
+- Enforced by hook: `option-b-architecture-guard`
+- Steered by: `.kiro/steering/option-b-target-model.md`
+- Monitored by: `ecc-coverage-analyst` agent at every pipeline stage
 
 ---
 

@@ -1,0 +1,47 @@
+name: contract-lifecycle-integrity-check
+description: Ensures that contract master, event history, valuation results, and posting data remain in separate domain tables and are correctly linked. Enforces Option B domain separation rule OB-05 and event immutability rule OB-06.
+when:
+  type: fileEdited
+  patterns:
+    - "specs/001-contract-master-z/**"
+    - "specs/003-valuation-engine-z/**"
+    - "specs/004-accounting-engine-z/**"
+    - "specs/006-contract-event-lifecycle-z/**"
+    - "docs/architecture/domain-data-model.md"
+then:
+  type: askAgent
+  prompt: |
+    A contract lifecycle spec or data model file was just saved: {{file}}
+
+    Perform the Contract Lifecycle Integrity Check.
+
+    REFERENCE: docs/architecture/domain-data-model.md defines the 10 domain separation rules.
+
+    CHECK 1 — DOMAIN SEPARATION (OB-05)
+    Verify that the file does NOT propose merging data from different domains into a single table:
+    - Contract master data (Domain 1) must not contain valuation results (Domain 3)
+    - Contract master data must not contain posting history (Domain 4)
+    - Valuation results must not contain contract master fields (except FK to Domain 1)
+    - Posting history must not contain calculation details (except FK to Domain 3)
+    - Event history must not be stored in the contract master table
+    Flag any domain boundary violation.
+
+    CHECK 2 — EVENT IMMUTABILITY (OB-06)
+    If the file describes a contract change flow, verify:
+    - Changes are captured as new event rows (not UPDATE on existing rows)
+    - Before/after snapshots are stored per event
+    - Events reference the contract ID (FK to Domain 1)
+    Flag any destructive update pattern.
+
+    CHECK 3 — TRACEABILITY CHAIN (OB-07)
+    If posting logic is described, verify the chain exists:
+    Contract ID → Event ID → Calculation Run ID → Posting Log → FI Document Reference
+    Flag any break in this traceability chain.
+
+    CHECK 4 — Z CONTRACT ID AS ANCHOR
+    Verify that all domain tables reference the Z Contract ID as the common anchor key.
+    Flag any design where the anchor key is missing or uses a RE-FX key instead.
+
+    OUTPUT:
+    - If all checks pass: output exactly "Contract lifecycle integrity check: PASSED."
+    - If issues found: list each issue with the specific check number and the file location.
