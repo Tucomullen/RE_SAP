@@ -26,7 +26,17 @@
       "Bash(python3 -c \":*)",
       "Bash(powershell -Command \"Get-Command pwsh\")",
       "Bash(powershell -Command \"Write-Output ''ps works''\")",
-      "Bash(find /c/Users/xlgarcia/projects/RE_SAP -type d -not -path */node_modules/*)"
+      "Bash(find /c/Users/xlgarcia/projects/RE_SAP -type d -not -path */node_modules/*)",
+      "Bash(python -c \"import pdfplumber; pdf = pdfplumber.open\\(r''''c:\\\\Users\\\\xlgarcia\\\\projects\\\\RE_SAP\\\\knowledge\\\\currently-design\\\\BBP_IFRS16_Implantación SAP RE_v3.pdf''''\\); print\\(len\\(pdf.pages\\)\\); print\\(pdf.pages[0].extract_text\\(\\)[:3000]\\)\")",
+      "Bash(python3 -c \"import pdfplumber; pdf = pdfplumber.open\\(r''''c:\\\\Users\\\\xlgarcia\\\\projects\\\\RE_SAP\\\\knowledge\\\\currently-design\\\\BBP_IFRS16_Implantación SAP RE_v3.pdf''''\\); print\\(len\\(pdf.pages\\)\\); print\\(pdf.pages[0].extract_text\\(\\)[:3000]\\)\")",
+      "Bash(where pdftotext:*)",
+      "Bash(where mutool:*)",
+      "Bash(powershell -Command \"Get-Command pdftotext -ErrorAction SilentlyContinue\")",
+      "Bash(pdftotext -enc UTF-8 \"c:\\\\Users\\\\xlgarcia\\\\projects\\\\RE_SAP\\\\knowledge\\\\currently-design\\\\BBP_IFRS16_Implantación SAP RE_v3.pdf\" -)",
+      "Bash(pdftotext -enc UTF-8 \"c:\\\\Users\\\\xlgarcia\\\\projects\\\\RE_SAP\\\\knowledge\\\\currently-design\\\\D05_Acciona_DF_Reclasificación de LP a CP_v1.7.pdf\" -)",
+      "Bash(pdftotext -enc UTF-8 \"c:\\\\Users\\\\xlgarcia\\\\projects\\\\RE_SAP\\\\knowledge\\\\currently-design\\\\DF_IFRS16_Generación automática del contrato+SCTASK1418091_modif_lógica_exp_RE_v3.pdf\" -)",
+      "Bash(find /c/Users/xlgarcia/projects/RE_SAP -type f -name *.md -o -name *.kiro*)",
+      "Bash(grep -E \"\\\\.\\(md|json\\)$\")"
     ]
   }
 }

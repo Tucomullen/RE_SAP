@@ -1,5 +1,6 @@
 ---
 inclusion: auto
+description: RAG knowledge base policy — source priority, trust levels, and curation rules for the RE-SAP IFRS 16 addon.
 ---
 
 # RAG Policy — RE-SAP IFRS 16 Addon

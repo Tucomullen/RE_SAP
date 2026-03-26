@@ -1,5 +1,6 @@
 ---
 inclusion: auto
+description: Decision logging policy — ADR format, approval workflow, and governance rules for architectural and accounting decisions in the RE-SAP IFRS 16 addon.
 ---
 
 # Decision Policy — RE-SAP IFRS 16 Addon

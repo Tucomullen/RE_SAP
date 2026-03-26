@@ -1,5 +1,6 @@
 ---
 inclusion: always
+description: Option B target operating model — the Z addon fully replaces RE-FX as system of record; non-negotiable architectural constraints and the 9 capability domains.
 ---
 
 # Option B — Official Target Operating Model

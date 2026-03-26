@@ -1,5 +1,6 @@
 ---
 inclusion: always
+description: Documentation policy — mandatory update rules, traceability footers, diagram standards, and style guidelines for all project documents.
 ---
 
 # Documentation Policy — RE-SAP IFRS 16 Addon

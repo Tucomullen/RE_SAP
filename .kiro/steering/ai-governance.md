@@ -1,5 +1,6 @@
 ---
 inclusion: always
+description: AI governance rules — permitted and prohibited AI uses, human approval gates, and data handling constraints for the RE-SAP IFRS 16 addon.
 ---
 
 # AI Governance Steering — RE-SAP IFRS 16 Addon

@@ -1,5 +1,6 @@
 ---
 inclusion: always
+description: Folder structure, file naming conventions, ABAP object naming, Z table and class naming standards, and knowledge base metadata requirements.
 ---
 
 # Structure and Naming Conventions — RE-SAP IFRS 16 Addon

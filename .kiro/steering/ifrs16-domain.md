@@ -1,5 +1,6 @@
 ---
 inclusion: auto
+description: IFRS 16 domain rules, accounting scope boundaries, and agent constraints for the RE-SAP addon.
 ---
 
 # IFRS 16 Domain Steering — RE-SAP Addon

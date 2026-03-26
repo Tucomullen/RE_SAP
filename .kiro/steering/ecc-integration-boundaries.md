@@ -1,5 +1,6 @@
 ---
 inclusion: auto
+description: ECC integration boundaries — permitted SAP ECC module integrations, prohibited RE-FX runtime dependencies, and Option B compliance rules.
 ---
 
 # SAP ECC Integration Boundaries — Z Lease Management Addon

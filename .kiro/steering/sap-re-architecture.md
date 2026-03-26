@@ -1,5 +1,6 @@
 ---
 inclusion: auto
+description: SAP RE architecture reference — ECC landscape assumptions, Z object strategy, and integration patterns for the IFRS 16 addon under Option B.
 ---
 
 # SAP RE/RE-FX Architecture Steering — IFRS 16 Addon
