@@ -4,6 +4,13 @@ inclusion: always
 
 # Orchestration Policy — RE-SAP IFRS 16 Addon
 
+## ARCHITECTURAL MANDATE
+All orchestration operates under **Option B** — the Z addon is the system of record. RE-FX is NOT the source of contract truth. Any pipeline stage that previously referenced `sap-re-ifrs16` for RE-FX object mapping now routes to `ecc-coverage-analyst` for business coverage preservation analysis. See `.kiro/steering/option-b-target-model.md`.
+
+Every request must be tagged to at least one of the 9 Capability Domains (CD-01 to CD-09) defined in `option-b-target-model.md`. The capability domain tag is part of the classification output at Step 0.
+
+---
+
 ## Principle: All Relevant Requests Enter Through the Master Orchestrator
 
 Every relevant project request — new feature, functional change, screen or UX change, bugfix, technical architecture decision, documentation update, or any combination — must enter through the `orchestrator-ifrs16` agent first.
@@ -31,10 +38,10 @@ The orchestrator classifies every incoming request before taking any other actio
 ## Delivery Pipelines by Change Type
 
 ### Pipeline A — New Feature
-Stages: A1 (US + AC in spec) → A2 (ifrs16-domain) → A3 (sap-re-ifrs16) → A4 (ux-stitch, if UI) → A5 (ui5-fiori-bridge, if screen.html exists) → A6 (abap-architecture, if ABAP needed) → A7 (tasks.md update) → A8 (docs-continuity) → A9 (qa-audit-controls) → A10 (governance check).
+Stages: A1 (US + AC in spec — tag capability domain CD-0x) → A2 (ifrs16-domain: accounting rules) → A3 (ecc-coverage-analyst: confirm business coverage preserved) → A4 (ux-stitch, if UI) → A5 (ui5-fiori-bridge, if screen.html exists) → A6 (abap-architecture, if ABAP needed) → A7 (tasks.md update) → A8 (docs-continuity) → A9 (qa-audit-controls) → A10 (governance check: Option B guard + capability domain mapped).
 
 ### Pipeline B — Functional Change (no UI)
-Stages: B1 (spec impact) → B2 (ifrs16-domain) → B3 (sap-re-ifrs16) → B4 (abap-architecture, if needed) → B5 (spec/tasks update) → B6 (docs-continuity) → B7 (qa-audit-controls) → B8 (governance check).
+Stages: B1 (spec impact + capability domain tag) → B2 (ifrs16-domain) → B3 (ecc-coverage-analyst: confirm coverage preserved) → B4 (abap-architecture, if needed) → B5 (spec/tasks update) → B6 (docs-continuity) → B7 (qa-audit-controls) → B8 (governance check: Option B guard).
 
 ### Pipeline C — UI / UX Change
 Stages: C1 (spec + design contract check) → C2 (ux-stitch) → C3 (ui5-fiori-bridge, if screen.html exists) → C4 (ifrs16-domain, if accounting judgment exposed) → C5 (spec/tasks update) → C6 (docs-continuity) → C7 (qa-audit-controls) → C8 (UX traceability check).
@@ -43,7 +50,7 @@ Stages: C1 (spec + design contract check) → C2 (ux-stitch) → C3 (ui5-fiori-b
 Stages: D1 (reproduce + classify bug type) → D2 (run sub-pipeline B/C/E as appropriate) → D3 (qa-audit-controls: regression + prevention) → D4 (docs-continuity, if user-visible) → D5 (tasks.md closure).
 
 ### Pipeline E — Technical Change
-Stages: E1 (abap-architecture) → E2 (sap-re-ifrs16, if integration impacted) → E3 (spec/doc impact check) → E4 (docs-continuity) → E5 (qa-audit-controls) → E6 (ADR proposal if architectural).
+Stages: E1 (abap-architecture) → E2 (ecc-coverage-analyst, if ECC integration boundaries impacted) → E3 (spec/doc impact check + Option B guard) → E4 (docs-continuity) → E5 (qa-audit-controls) → E6 (ADR proposal if architectural).
 
 ### Pipeline F — Documentation Change
 Stages: F1 (docs-continuity: cross-layer alignment) → F2 (rag-knowledge, if knowledge/ affected) → F3 (traceability footers + version headers).
@@ -58,7 +65,7 @@ Decompose into constituent types, announce the decomposition and sequence, run p
 | Agent | When activated |
 |-------|----------------|
 | `ifrs16-domain` | Any change involving IFRS 16 accounting rules, lease identification, measurement, disclosures |
-| `sap-re-ifrs16` | Any change involving SAP RE-FX processes, objects, or integration points |
+| `ecc-coverage-analyst` | Any change requiring analysis of current ECC business functionality to preserve in Option B |
 | `abap-architecture` | Any change involving Z objects, ABAP classes, tables, batch jobs, or integration patterns |
 | `ux-stitch` | Any UI or UX design work — screen review, pain-point validation, Stitch prompt creation |
 | `ui5-fiori-bridge` | When screen.html from a Stitch export is available and a UI5 spec is needed |
@@ -133,7 +140,12 @@ The following hooks operate alongside the orchestrator. They are automatic quali
 | `controlled-closure-check` | task marked complete | Enforces 5-point closure gate: spec, docs, governance, QA, next action |
 | `session-governance-check` | agent session ends | Scans session for governance register items and reusable knowledge to capture |
 | `ux-traceability-check` | UX/docs file saved | Verifies UX traceability across functional/user docs, ux-stitch artifacts, PAIN_POINTS_TRACEABILITY.md |
-| `spec-documentation-guard` | technical/governance doc saved | Checks cross-doc implications when technical or governance docs change |
+| `spec-documentation-guard` | technical/governance/architecture doc saved | Checks cross-doc implications when technical, governance, or architecture docs change |
+| `option-b-architecture-guard` | any spec/design/steering/agent file saved | Rejects or flags designs that reintroduce RE-FX as source of truth or processing engine |
+| `capability-coverage-check` | spec file saved | Ensures every feature maps to at least one of the 9 capability domains (CD-01 to CD-09) |
+| `contract-lifecycle-integrity-check` | contract-related spec or design saved | Ensures contract master, event history, valuation, and posting traceability remain coherent |
+| `accounting-traceability-check` | posting/accounting spec or design saved | Ensures every accounting output is traceable to source event + valuation run + audit trail |
+| `open-questions-register-check` | session end / spec save | Ensures all open questions are registered in docs/architecture/open-questions-register.md |
 
 The orchestrator is responsible for the delivery pipeline. Hooks are responsible for automated quality signals within that pipeline. They are complementary.
 

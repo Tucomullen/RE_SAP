@@ -1,0 +1,47 @@
+name: accounting-traceability-check
+description: Ensures every accounting output (FI document, posting, calculation result) is traceable back to its source business event, valuation run, and calculation inputs. Enforces OB-07 and the audit trail requirements.
+when:
+  type: fileEdited
+  patterns:
+    - "specs/004-accounting-engine-z/**"
+    - "specs/003-valuation-engine-z/**"
+    - "specs/008-reclassification-engine-z/**"
+    - "docs/technical/*.md"
+then:
+  type: askAgent
+  prompt: |
+    An accounting or valuation spec was just saved: {{file}}
+
+    Perform the Accounting Traceability Check.
+
+    RULE OB-07: Every accounting output must be traceable to: source business event + valuation run + calculation inputs.
+
+    CHECK 1 — FI DOCUMENT TRACEABILITY
+    For every FI posting pattern described in the file, verify:
+    a) The Z Contract ID is embedded in the FI document (XBLNR or BKTXT or equivalent)
+    b) The Z Calculation Run ID is embedded in the FI document
+    c) A corresponding entry is written to the posting log table (ZRIF16_POST_LOG or equivalent)
+    d) The posting log entry links: contract ID → event ID (if applicable) → run ID → FI document number
+    Flag any posting pattern missing any of these.
+
+    CHECK 2 — CALCULATION AUDITABILITY
+    For every calculation result described, verify:
+    a) The inputs snapshot is stored (IBR used, lease term used, payment schedule used, effective date)
+    b) The calculation outputs are stored separately from the inputs (Domain 3 separation)
+    c) Old calculation results are preserved when a new run supersedes them (no destructive update)
+    Flag any calculation design that loses input data or overwrites results.
+
+    CHECK 3 — SIMULATION BEFORE POSTING
+    If a posting flow is described, verify that a simulation mode (preview without posting) is explicitly supported.
+    Flag if simulation is not mentioned.
+
+    CHECK 4 — ERROR ACCOUNTABILITY
+    For any batch or bulk operation, verify that:
+    a) Per-item (per-contract) error logging is described
+    b) One failed contract does not block other contracts
+    c) Errors are logged with contract ID, error code, and human-readable message
+    Flag if error handling is not described at item level.
+
+    OUTPUT:
+    - If all checks pass: output exactly "Accounting traceability check: PASSED."
+    - If issues found: list each issue with check number and specific location in the file.

@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "option-b-architecture-guard",
+  "description": "Rejects or flags any design proposal that reintroduces RE-FX as a source of contract truth, processing engine, or accounting engine. Enforces ADR-006 and Option B governance rules OB-01 to OB-09.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "specs/**/*.md",
+      ".kiro/agents/*.json",
+      "docs/architecture/*.md",
+      "docs/technical/*.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A project file was just saved: {{file}}\n\nPerform the Option B Architecture Guard check.\n\nCONTEXT: This project operates under ADR-006 — Option B. The Z addon is the system of record. RE-FX is NOT used at runtime. See .kiro/steering/option-b-target-model.md for the full mandate.\n\nSCAN FOR VIOLATIONS:\n\n1. RE-FX RUNTIME DEPENDENCY (OB-01, OB-02)\n   Scan the saved file for any of these prohibited patterns:\n   - \"Read from RECN*\" or \"RECN* tables\" used as a runtime source\n   - \"VICNCOND\" or \"VIOBJHEAD\" referenced as a data source\n   - \"RE-FX contract\" as the system of record\n   - \"extension table on RE-FX contract\"\n   - \"RE-FX condition type\" determining lease payment classification\n   - \"FK to RE-FX object at runtime\"\n   If found: flag as VIOLATION OB-01/OB-02.\n\n2. RE-FX ACCOUNTING ENGINE (OB-03)\n   Scan for:\n   - \"RE-FX accounting engine\" generating FI documents\n   - \"RE-FX posting\" or \"RE-FX valuation engine\" used in the flow\n   If found: flag as VIOLATION OB-03.\n\n3. CAPABILITY DOMAIN MISSING (OB-04)\n   If the file is a spec requirements.md or design.md, check if it references at least one of:\n   CD-01, CD-02, CD-03, CD-04, CD-05, CD-06, CD-07, CD-08, CD-09.\n   If no domain reference found: flag as WARNING OB-04.\n\n4. DOMAIN SEPARATION VIOLATED (OB-05)\n   If a Z table design is described, check that contract data / valuation data / posting data / event data are not merged into a single table.\n   Reference: docs/architecture/domain-data-model.md\n   If merged: flag as VIOLATION OB-05.\n\n5. DESTRUCTIVE CONTRACT CHANGE (OB-06)\n   If a contract change flow is described, check that it uses the event model (not UPDATE on contract master).\n   If direct UPDATE without event: flag as VIOLATION OB-06.\n\n6. ACCOUNTING WITHOUT TRACEABILITY (OB-07)\n   If a posting flow is described, check that it includes:\n   - Z Contract ID in FI document reference\n   - Z Calculation Run ID in FI document reference\n   - Entry in ZRIF16_POST_LOG (or equivalent posting log)\n   If any of these are missing: flag as VIOLATION OB-07.\n\nOUTPUT:\n- If NO violations found: output exactly \"Option B architecture guard: PASSED — no violations detected.\"\n- If violations found: output \"Option B architecture guard: VIOLATIONS DETECTED\" followed by the specific rule violated (OB-0x), the exact text in the file that triggered the violation, and the compliant alternative."
+  },
+  "workspaceFolderName": "RE_SAP",
+  "shortName": "option-b-architecture-guard"
+}

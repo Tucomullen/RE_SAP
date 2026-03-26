@@ -1,15 +1,20 @@
-# Master Design — IFRS 16 Z Addon for SAP RE/RE-FX
+# Master Design — IFRS 16 Z Addon for SAP ECC (Option B)
 
 | Version | Date | Author | Summary |
 |---------|------|--------|---------|
 | 0.1 | 2026-03-24 | Bootstrap | Initial design baseline |
 | 0.2 | 2026-03-24 | Remediation | Added section 11 (Pain Point Mitigation Patterns), S/4HANA ECC flags, and open question OQ-08 |
+| 0.3 | 2026-03-26 | Remediation | Option B mandate applied (ADR-006): Z addon is system of record, RE-FX removed as runtime layer, 9 capability domains added |
+
+---
+
+> **ARCHITECTURAL MANDATE — OPTION B (ADR-006, 2026-03-26):** The Z addon is the system of record. RE-FX is NOT used at runtime for contracts, valuation, or accounting. See `.kiro/steering/option-b-target-model.md` and `docs/architecture/option-b-architecture.md`.
 
 ---
 
 ## 1. Architecture Overview
 
-The IFRS 16 Z addon is a **layered ABAP architecture** embedded in the SAP ECC landscape, operating on top of SAP RE/RE-FX without modifying standard objects. It consists of five logical layers:
+The IFRS 16 Z addon is a **layered ABAP architecture** embedded in the SAP ECC landscape, operating as a fully self-contained system of record under Option B (ADR-006). RE-FX is not used at runtime. The addon consists of five logical layers:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -21,32 +26,51 @@ The IFRS 16 Z addon is a **layered ABAP architecture** embedded in the SAP ECC l
 ├─────────────────────────────────────────────────────────┤
 │  BUSINESS LOGIC LAYER  (ABAP OO classes, calculation)   │
 ├─────────────────────────────────────────────────────────┤
-│  DATA LAYER  (Z tables, RE-FX reads, FI integration)    │
+│  DATA LAYER  (Z Persistence Layer — Z tables across     │
+│               10 domain areas; no RE-FX dependency)     │
 └─────────────────────────────────────────────────────────┘
 ```
 
 The layers communicate downward only — upper layers call lower layers, not the reverse. Business logic is never duplicated across layers.
 
+The Z Persistence Layer covers 10 data domains:
+- Domain 1: Contract Truth / Contract Master (CD-01)
+- Domain 2: Lease Object Master (CD-02)
+- Domain 3: Valuation Results (CD-03)
+- Domain 4: Posting History (CD-04)
+- Domain 5: Contract Events / Lifecycle (CD-06)
+- Domain 6: Integration References (CD-07)
+- Domain 7: Supporting Documents
+- Domain 8: Error and Process Logs
+- Domain 9: Configuration / Accounting Determination (CD-04)
+- Domain 10: Reclassification History (CD-08)
+
+The 9 Capability Domains (CD-01 to CD-09) map to the specs in `specs/001-*` through `specs/009-*`. See Section 12 for the full domain table.
+
 ---
 
 ## 2. Logical Components
 
-### 2.1 Contract Data Provider
-- **Purpose:** Reads RE-FX contract data and maps it to the IFRS 16 data model.
+### 2.1 Contract Data Provider (CD-01, CD-02)
+- **Purpose:** Reads Z contract master and lease object master as the source of truth for all IFRS 16 processing.
 - **Key objects:** `ZCL_RIF16_CONTRACT_DATA`, `ZIF_RIF16_DATA_PROVIDER`
-- **Reads:** RE-FX contract header, conditions, option dates, partner data [specific tables TBC]
+- **Reads:** `ZRIF16_CONTRACT` (Z contract master — Domain 1), `ZRIF16_LEASE_OBJ` (lease object — Domain 2), contract conditions, option dates, partner data
 - **Produces:** Structured IFRS 16 contract data transfer object
 
-### 2.2 IFRS 16 Data Extension Model
-- **Purpose:** Stores IFRS 16-specific data not available in standard RE-FX.
-- **Key objects:** `ZRIF16_CNTRT` (contract extension), `ZRIF16_PARAM` (parameters), `ZRIF16_MODF` (modifications)
+> Option B note: `ZCL_RIF16_CONTRACT_DATA` reads `ZRIF16_CONTRACT` (Z contract master). It does NOT read RE-FX tables at runtime.
+
+### 2.2 Z Valuation Engine (CD-03)
+- **Purpose:** Stores IFRS 16-specific valuation data and implements the full calculation engine in Z.
+- **Key objects:** `ZRIF16_CONTRACT` (contract master, Domain 1), `ZRIF16_PARAM` (parameters), `ZRIF16_VALUATION` (valuation results, Domain 3)
 - **Maintained via:** Z intake transaction and modification workflow
 
-### 2.3 Calculation Engine
+> Option B note: `ZRIF16_CONTRACT` is the primary contract master table (Domain 1). It is NOT an extension table on RE-FX.
+
+### 2.3 Calculation Engine (CD-03)
 - **Purpose:** Computes amortization schedules, period entries, and modification impacts.
 - **Key objects:** `ZCL_RIF16_CALC_ENGINE`, `ZIF_RIF16_CALC_STRATEGY`
 - **Strategies:** Standard amortization, short-term/low-value (exemption — no schedule), modification adjustment, remeasurement
-- **Inputs:** Approved IFRS 16 data (from Z extension model + RE-FX)
+- **Inputs:** Approved IFRS 16 data (from Z contract master + Z valuation model)
 - **Outputs:** `ZRIF16_SCHED` (schedule), `ZRIF16_CALC` + `ZRIF16_CALCI` (run logs)
 
 ### 2.4 Approval Workflow
@@ -54,23 +78,40 @@ The layers communicate downward only — upper layers call lower layers, not the
 - **Key objects:** SAP workflow or Z approval table [TO BE CONFIRMED — SAP WS vs. Z approval table approach]
 - **Gates:** Data capture review, calculation approval, modification approval, posting authorization
 
-### 2.5 Posting Handler
-- **Purpose:** Generates FI journal entries from approved IFRS 16 period entries.
+### 2.5 FI-GL Posting Engine (CD-04)
+- **Purpose:** Generates FI journal entries from approved IFRS 16 period entries via direct FI BAPIs.
 - **Key objects:** `ZCL_RIF16_POSTING`, `ZIF_RIF16_POSTING_HANDLER`
-- **Integration:** FI-GL posting (standard accounting interface [TO BE CONFIRMED]), FI-AA for ROU asset [TO BE CONFIRMED]
-- **References:** Every FI document carries the IFRS 16 calculation run ID
+- **Integration:** FI-GL posting via standard FI BAPIs (BAPI_ACC_DOCUMENT_POST or equivalent)
+- **References:** Every FI document carries the IFRS 16 calculation run ID and Z contract ID
 
-### 2.6 Disclosure Engine
+### 2.6 FI-AA Asset Engine (CD-05)
+- **Purpose:** Creates and manages ROU assets in FI-AA directly from the Z addon.
+- **Key objects:** `ZCL_RIF16_AA_HANDLER`
+- **Integration:** FI-AA asset creation on initial recognition; asset retirement on lease termination; useful life update on remeasurement
+- **References:** Z contract ID linked to FI-AA asset number in Z reference tables (Domain 6)
+
+### 2.7 Contract Event Engine (CD-06)
+- **Purpose:** Non-destructive event model for all contract lifecycle changes.
+- **Key objects:** `ZCL_RIF16_EVENT_ENGINE`, `ZRIF16_EVENTS` (Domain 5)
+- **Events are immutable:** Once written they cannot be changed or deleted.
+- **Triggers remeasurement:** IFRS 16 modification events automatically initiate a new valuation run.
+
+### 2.8 Reclassification Engine (CD-08)
+- **Purpose:** Reliable, transparent reclassification of lease liability from non-current to current portion.
+- **Key objects:** `ZCL_RIF16_RECLASSIFY`, `ZRIF16_RECLASSIF` (Domain 10)
+- **Design rule:** Reclassification fails with explicit per-contract errors — not silently (addresses PP-C pain point).
+
+### 2.9 Disclosure Engine (CD-09)
 - **Purpose:** Aggregates IFRS 16 data across all contracts for disclosure note generation.
 - **Key objects:** `ZCL_RIF16_DISCLOSURE`
 - **Outputs:** Maturity analysis, liability/ROU rollforward, weighted average discount rate
 
-### 2.7 Audit and Logging Framework
+### 2.10 Audit and Logging Framework
 - **Purpose:** Provides complete, immutable audit trail for all IFRS 16 process events.
 - **Key objects:** `ZCL_RIF16_LOGGER`, `ZRIF16_AUDIT`, SAP SLG1 log object `ZRIF16`
 - **Captures:** All user actions, all calculation runs, all approval events, all posting events
 
-### 2.8 Administration and Configuration
+### 2.11 Administration and Configuration
 - **Purpose:** Maintains IFRS 16 parameters, policy elections, and user settings.
 - **Key objects:** `ZRIF16_PARAM`, admin transaction `ZRE_IFRS16_ADMIN`
 - **Manages:** Low-value threshold, short-term policy elections by asset class, GL account assignments, rate overrides
@@ -85,8 +126,22 @@ The Kiro multiagent system governs project delivery — not runtime SAP executio
 Orchestrator (orchestrator-ifrs16)
     ├── IFRS 16 Domain Specialist (ifrs16-domain)
     │       → Accounting rules, scope analysis, explainability
-    ├── SAP RE Specialist (sap-re-ifrs16)
-    │       → RE-FX mapping, object catalog, process design
+    ├── ECC Coverage Analyst (ecc-coverage-analyst)
+    │       → ECC business coverage, Z replacement analysis
+    ├── Contract Model Architect (contract-model-architect)
+    │       → CD-01, CD-02: contract master and lease object model
+    ├── Valuation Engine Architect (valuation-engine-architect)
+    │       → CD-03: calculation engine, schedules, IBR
+    ├── FI-GL Integration Architect (fi-gl-integration-architect)
+    │       → CD-04: posting patterns, account determination
+    ├── FI-AA Integration Architect (fi-aa-integration-architect)
+    │       → CD-05: ROU asset creation, depreciation, derecognition
+    ├── Contract Event Architect (contract-event-architect)
+    │       → CD-06: lifecycle events, modification classification
+    ├── Reporting & Audit Architect (reporting-audit-architect)
+    │       → CD-09: reporting, rollforward, disclosure, audit evidence
+    ├── Migration Coverage Reviewer (migration-coverage-reviewer)
+    │       → Phase 0/1/2 coverage certification gates
     ├── ABAP Architect (abap-architecture)
     │       → Technical design, Z objects, integration patterns
     ├── RAG Curator (rag-knowledge)
@@ -116,7 +171,7 @@ The RAG knowledge base serves both the project agents and (in future) the end-us
 knowledge/
 ├── official-ifrs/     [Priority 1-2]  → IFRS 16 standard, IASB materials
 ├── project-decisions/ [Priority 3]    → Approved ADRs, policy decisions
-├── sap-functional/    [Priority 4-5]  → SAP RE documentation, process maps
+├── sap-functional/    [Priority 4-5]  → SAP ECC documentation, process maps
 ├── ux-stitch/         [Priority 7]    → Design artifacts
 └── user-feedback/     [Priority 8]    → UAT findings, pain points
 ```
@@ -137,7 +192,7 @@ knowledge/
 ```
 Requirement Change
        ↓
-Spec Updated (specs/000-master-ifrs16-addon/)
+Spec Updated (specs/000-master-ifrs16-addon/ AND relevant specs/00x-*/)
        ↓
 Functional Design Updated (docs/functional/)
        ↓
@@ -173,7 +228,7 @@ Agent generates: Field specifications, interaction rules, implementation tasks
        ↓
 Tasks added to specs/000-master-ifrs16-addon/tasks.md
        ↓
-SAP RE Specialist + ABAP Architect review implementation feasibility
+ECC Coverage Analyst + ABAP Architect review implementation feasibility
        ↓
 Functional Spec updated with UI specifications
        ↓
@@ -189,7 +244,7 @@ Until Stitch MCP is available: designs are delivered as screenshots, exported fi
 | Integration | MCP Server Name (Logical) | Purpose | Status |
 |------------|--------------------------|---------|--------|
 | Google Stitch | `stitch` or `mcp-stitch` | Read UI designs directly | Not installed — TO BE CONFIRMED |
-| SAP RFC Gateway | `sap-rfc` or `mcp-sap` | Query live SAP RE-FX data for design validation | Not installed — TO BE CONFIRMED |
+| SAP RFC Gateway | `sap-rfc` or `mcp-sap` | Query live SAP ECC data for design validation | Not installed — TO BE CONFIRMED |
 | Vector Knowledge Store | `rag-store` or `mcp-vectordb` | Semantic RAG retrieval over knowledge/ | Not installed — TO BE CONFIRMED |
 | AI Document Reader | `mcp-docs` | Parse PDF/Word source documents | Not installed — TO BE CONFIRMED |
 
@@ -225,26 +280,30 @@ All MCP integrations must pass security review before activation. See .kiro/stee
 
 ### Phase 0 — Foundation (Pre-Development)
 - Finalize accounting policy decisions.
-- Complete SAP RE-FX blueprint and field mapping.
+- Complete ECC business coverage analysis and Z replacement mapping (ecc-coverage-analyst).
 - Confirm technical landscape (ABAP version, transport, authorizations).
 - Populate knowledge base with official IFRS 16 sources and SAP documentation.
 - Complete all [TO BE CONFIRMED] items in requirements and design.
+- Certify Phase 0 coverage gate (migration-coverage-reviewer).
 
-### Phase 1 — Core Engine (MVP)
-- Contract data extension model.
-- Calculation engine (standard amortization, exemptions).
+### Phase 1 — Core Engine (MVP) — CD-01, CD-02, CD-03, CD-04
+- Z contract master data model (CD-01) and lease object master (CD-02).
+- Z valuation engine — standard amortization, exemptions (CD-03).
 - Basic intake workflow.
 - Period-end batch calculation.
-- Posting framework (with manual approval gate).
+- FI-GL posting framework via direct BAPIs (CD-04), with manual approval gate.
 - Audit trail foundation.
+- Certify Phase 1 coverage gate (migration-coverage-reviewer).
 
-### Phase 2 — Modifications and Governance
-- Modification detection and classification wizard.
-- Remeasurement workflow.
+### Phase 2 — Events, Assets, and Governance — CD-05, CD-06, CD-08, CD-09
+- Contract event engine — modification, extension, termination (CD-06).
+- FI-AA ROU asset engine (CD-05).
+- Reclassification engine (CD-08).
 - Full approval workflow.
-- Disclosure engine (maturity analysis, rollforward).
+- Disclosure engine — maturity analysis, rollforward (CD-09).
 - Reconciliation report.
 - Internal controls enforcement.
+- Certify Phase 2 coverage gate (migration-coverage-reviewer).
 
 ### Phase 3 — AI and Automation Enhancement
 - AI assistant integration (Copilot/Gemini layer).
@@ -259,7 +318,7 @@ All MCP integrations must pass security review before activation. See .kiro/stee
 
 | ID | Question | Impact | Owner | Target Date |
 |----|---------|--------|-------|------------|
-| OQ-01 | Which RE-FX tables/BAPIs are available and suitable for contract data reading? | All Z development | SAP RE Functional Consultant | Phase 0 |
+| OQ-01 | Which Z tables replace the RE-FX contract data source? Full Domain 1 schema to be validated. | All Z development | Contract Model Architect | Phase 0 |
 | OQ-02 | Is a parallel IFRS ledger required, or are IFRS 16 entries in the main ledger? | Posting architecture | FI Architect | Phase 0 |
 | OQ-03 | What is the IBR determination process and who owns it? | Calculation engine inputs | IFRS 16 Accountant + Treasury | Phase 0 |
 | OQ-04 | Which SAP workflow technology to use for approval gates? (SAP WS vs. Z table) | Approval workflow design | ABAP Architect | Phase 1 |
@@ -303,7 +362,7 @@ Design rules:
 
 ### 11.2 Special Posting Explanation Pattern (PP-B, PP-F)
 
-Applied to: Posting Handler, any Z program generating non-standard FI entries.
+Applied to: FI-GL Posting Engine (CD-04), any Z program generating non-standard FI entries.
 
 ```
 System-generated special posting
@@ -342,16 +401,15 @@ Active → (rescission pending) → Rescission Pending
 ```
 
 Design rules:
-- Status stored in `ZRIF16_CNTRT` header field.
+- Status stored in `ZRIF16_CONTRACT` header field (Domain 1).
 - All contract list views default to filter: Active + Extension/Rescission Pending.
 - Rescinded contracts are VISIBLE with clear status label — never hidden.
 - Extension/Rescission workflow enforces sequence gate checks before status transitions.
-- [ECC-SPECIFIC: Status change events logged in change document for Z table; S/4HANA equivalent
-  would use ABAP RAP change documents if applicable].
+- [ECC-SPECIFIC: Status change events logged in change document for Z table].
 
 ### 11.4 Contract-Level Amortization Reporting (PP-G)
 
-Applied to: Calculation Engine output, Disclosure Engine.
+Applied to: Calculation Engine output, Disclosure Engine (CD-09).
 
 Design rule: Every calculation run stores schedule data at line level in `ZRIF16_SCHED` with
 contract ID as a key field. No aggregation-only storage.
@@ -365,7 +423,7 @@ Report structure:
 
 ### 11.5 Upgrade Impact Detection (PP-H)
 
-Applied to: Administration and Configuration component (section 2.8).
+Applied to: Administration and Configuration component (section 2.11).
 
 Trigger: Executed manually after any system upgrade or patch cycle.
 
@@ -397,7 +455,39 @@ User manual structure:
 |---------|-------------|--------------------------|
 | Pre-flight validation | ABAP class methods | Review ABAP RAP validation hooks if RE-FX migrated to RAP model |
 | Explanation templates | Z config table | Same approach; FIORI UI may require Odata adaptation |
-| Contract lifecycle status | Z field in ZRIF16_CNTRT | If standard S/4 RE offers lifecycle fields, use standard first |
+| Contract lifecycle status | Z field in ZRIF16_CONTRACT | If standard S/4 RE offers lifecycle fields, use standard first |
 | Special posting text | FI document text field | Standard approach should remain valid; confirm with FI team |
 | Upgrade impact report | Custom report | Equivalent functionality may exist in S/4 RE migration tools |
 | Multilingual messages | Message class ZRIF16_MSGS | Standard SAP translation workbench; compatible with S/4 |
+
+---
+
+## 12. Option B Architecture Reference
+
+The full Option B architecture is documented in `docs/architecture/option-b-architecture.md`.
+
+### 9 Capability Domains
+| Domain | ID | Spec |
+|--------|----|------|
+| Contract Master Z | CD-01 | specs/001-contract-master-z/ |
+| Lease Object Master Z | CD-02 | specs/002-lease-object-z/ |
+| Valuation Engine Z | CD-03 | specs/003-valuation-engine-z/ |
+| Accounting Engine Z (FI-GL) | CD-04 | specs/004-accounting-engine-z/ |
+| Asset Engine Z (FI-AA) | CD-05 | specs/005-fi-aa-integration-z/ |
+| Contract Event Engine Z | CD-06 | specs/006-contract-event-lifecycle-z/ |
+| Procurement / Source Integration Z | CD-07 | specs/007-procurement-source-integration-z/ |
+| Reclassification Engine Z | CD-08 | specs/008-reclassification-engine-z/ |
+| Reporting & Audit Z | CD-09 | specs/009-reporting-audit-z/ |
+
+### Data Domain Model
+See `docs/architecture/domain-data-model.md` for the conceptual separation of:
+- Domain 1: Contract Truth / Contract Master
+- Domain 2: Lease Object Master
+- Domain 3: Valuation Results
+- Domain 4: Posting History
+- Domain 5: Contract Events / Lifecycle
+- Domain 6: Integration References
+- Domain 7: Supporting Documents
+- Domain 8: Error and Process Logs
+- Domain 9: Configuration / Accounting Determination
+- Domain 10: Reclassification History

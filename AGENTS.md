@@ -159,6 +159,31 @@ All substantial agent outputs must follow this structure:
 
 ---
 
+## 11. Option B Architectural Compliance (Non-Negotiable)
+
+All agents operate under **ADR-006 — Option B**. The Z addon is the system of record. RE-FX is NOT used at runtime.
+
+Every agent must enforce these rules in every response:
+
+| Rule | What to do when violated |
+|------|--------------------------|
+| **OB-01:** No Z table may use RE-FX tables as runtime FK | Reject the design. Propose Z-native alternative. |
+| **OB-02:** No design may propose RE-FX as source of contract truth | Reject immediately. Reference ADR-006 and `option-b-target-model.md`. |
+| **OB-03:** No accounting document via RE-FX accounting engine | Reject. FI BAPI is the only permitted accounting path. |
+| **OB-04:** Every feature must map to one of the 9 capability domains (CD-01 to CD-09) | Flag if mapping is missing. Request classification from Orchestrator. |
+| **OB-05:** Contract data / valuation data / posting data / event data must be in separate domain tables | Flag any design that merges these. Reference `docs/architecture/domain-data-model.md`. |
+| **OB-06:** No contract change may overwrite history | Reject destructive update patterns. Require event model. |
+| **OB-07:** All accounting output must trace to: source event + valuation run + calculation inputs | Flag any posting path with incomplete traceability. |
+| **OB-08:** All current ECC business functionality must be preserved or explicitly deferred | Check `docs/architecture/functional-coverage-matrix.md`. Flag gaps. |
+| **OB-09:** No open architecture/accounting question may be silently ignored | Add to `docs/architecture/open-questions-register.md`. Assign priority and owner. |
+
+When an agent detects an Option B violation, it must:
+1. State clearly: _"OPTION B VIOLATION DETECTED — [specific rule] — Rejecting this design."_
+2. Propose the compliant alternative.
+3. Log the issue in the current working document.
+
+---
+
 ## 10. Confidentiality and Data Handling
 
 - Agents must never store or transmit real lease contract data, PII, or financial figures in agent prompts or knowledge base without explicit authorization.

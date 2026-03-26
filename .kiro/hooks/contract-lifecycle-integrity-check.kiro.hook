@@ -1,0 +1,22 @@
+{
+  "enabled": true,
+  "name": "contract-lifecycle-integrity-check",
+  "description": "Ensures contract master, event history, valuation results, and posting data remain in separate domain tables and are correctly linked. Enforces OB-05 and OB-06.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "specs/001-contract-master-z/**",
+      "specs/003-valuation-engine-z/**",
+      "specs/004-accounting-engine-z/**",
+      "specs/006-contract-event-lifecycle-z/**",
+      "docs/architecture/domain-data-model.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A contract lifecycle spec or data model file was just saved: {{file}}\n\nPerform the Contract Lifecycle Integrity Check.\n\nREFERENCE: docs/architecture/domain-data-model.md defines the 10 domain separation rules.\n\nCHECK 1 — DOMAIN SEPARATION (OB-05)\nVerify that the file does NOT propose merging data from different domains into a single table:\n- Contract master data (Domain 1) must not contain valuation results (Domain 3)\n- Contract master data must not contain posting history (Domain 4)\n- Valuation results must not contain contract master fields (except FK to Domain 1)\n- Posting history must not contain calculation details (except FK to Domain 3)\n- Event history must not be stored in the contract master table\nFlag any domain boundary violation.\n\nCHECK 2 — EVENT IMMUTABILITY (OB-06)\nIf the file describes a contract change flow, verify:\n- Changes are captured as new event rows (not UPDATE on existing rows)\n- Before/after snapshots are stored per event\n- Events reference the contract ID (FK to Domain 1)\nFlag any destructive update pattern.\n\nCHECK 3 — TRACEABILITY CHAIN (OB-07)\nIf posting logic is described, verify the chain exists:\nContract ID → Event ID → Calculation Run ID → Posting Log → FI Document Reference\nFlag any break in this traceability chain.\n\nCHECK 4 — Z CONTRACT ID AS ANCHOR\nVerify that all domain tables reference the Z Contract ID as the common anchor key.\nFlag any design where the anchor key is missing or uses a RE-FX key instead.\n\nOUTPUT:\n- If all checks pass: output exactly \"Contract lifecycle integrity check: PASSED.\"\n- If issues found: list each issue with the specific check number and the file location."
+  },
+  "workspaceFolderName": "RE_SAP",
+  "shortName": "contract-lifecycle-integrity-check"
+}

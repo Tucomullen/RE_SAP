@@ -1,0 +1,64 @@
+name: option-b-architecture-guard
+description: Rejects or flags any design proposal that reintroduces RE-FX as a source of contract truth, processing engine, or accounting engine. Enforces ADR-006 and the 9 Option B governance rules (OB-01 to OB-09).
+when:
+  type: fileEdited
+  patterns:
+    - "specs/**/*.md"
+    - ".kiro/agents/*.json"
+    - "docs/architecture/*.md"
+    - "docs/technical/*.md"
+then:
+  type: askAgent
+  prompt: |
+    A project file was just saved: {{file}}
+
+    Perform the Option B Architecture Guard check.
+
+    CONTEXT: This project operates under ADR-006 — Option B. The Z addon is the system of record. RE-FX is NOT used at runtime. See .kiro/steering/option-b-target-model.md for the full mandate.
+
+    SCAN FOR VIOLATIONS:
+
+    1. RE-FX RUNTIME DEPENDENCY (OB-01, OB-02)
+       Scan the saved file for any of these prohibited patterns:
+       - "Read from RECN*" or "RECN* tables" used as a runtime source
+       - "VICNCOND" or "VIOBJHEAD" referenced as a data source
+       - "RE-FX contract" as the system of record
+       - "extension table on RE-FX contract"
+       - "RE-FX condition type" determining lease payment classification
+       - "FK to RE-FX object at runtime"
+       If found: flag as VIOLATION OB-01/OB-02.
+
+    2. RE-FX ACCOUNTING ENGINE (OB-03)
+       Scan for:
+       - "RE-FX accounting engine" generating FI documents
+       - "RE-FX posting" or "RE-FX valuation engine" used in the flow
+       If found: flag as VIOLATION OB-03.
+
+    3. CAPABILITY DOMAIN MISSING (OB-04)
+       If the file is a spec requirements.md or design.md, check if it references at least one of:
+       CD-01, CD-02, CD-03, CD-04, CD-05, CD-06, CD-07, CD-08, CD-09.
+       If no domain reference found: flag as WARNING OB-04.
+
+    4. DOMAIN SEPARATION VIOLATED (OB-05)
+       If a Z table design is described, check that contract data / valuation data / posting data / event data are not merged into a single table.
+       Reference: docs/architecture/domain-data-model.md
+       If merged: flag as VIOLATION OB-05.
+
+    5. DESTRUCTIVE CONTRACT CHANGE (OB-06)
+       If a contract change flow is described, check that it uses the event model (not UPDATE on contract master).
+       If direct UPDATE without event: flag as VIOLATION OB-06.
+
+    6. ACCOUNTING WITHOUT TRACEABILITY (OB-07)
+       If a posting flow is described, check that it includes:
+       - Z Contract ID in FI document reference
+       - Z Calculation Run ID in FI document reference
+       - Entry in ZRIF16_POST_LOG (or equivalent posting log)
+       If any of these are missing: flag as VIOLATION OB-07.
+
+    OUTPUT:
+    - If NO violations found: output exactly "Option B architecture guard: PASSED — no violations detected."
+    - If violations found: output "Option B architecture guard: VIOLATIONS DETECTED" followed by:
+      - The specific rule violated (OB-0x)
+      - The exact text in the file that triggered the violation
+      - The compliant alternative that should replace it
+    - Do not elaborate beyond what is needed to identify and correct the violation.

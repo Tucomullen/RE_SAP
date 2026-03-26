@@ -5,14 +5,19 @@ inclusion: always
 # Technology Steering — RE-SAP IFRS 16 Addon
 
 ## SAP ECC Current Landscape
-The target platform is **SAP ECC 6.0** with the **RE-FX (Flexible Real Estate)** module activated. Key landscape assumptions:
 
-- RE-FX is the primary module for lease contract management (not the older classic RE).
-- FI-AA (Asset Accounting) is used for Right-of-Use asset management — standard asset classes may need extension.
-- FI-GL (New GL) is active; document splitting may be relevant for segment reporting.
-- Standard SAP BAPIs and function modules for RE-FX are available — **specific BAPIs must be confirmed before use** (to be confirmed).
+> **ARCHITECTURAL MANDATE — OPTION B:** The Z addon is the system of record for lease contracts. RE-FX is NOT the primary contract management system. See `.kiro/steering/option-b-target-model.md`.
+
+The target platform is **SAP ECC 6.0**. Key landscape assumptions:
+
+- **The Z addon replaces RE-FX** for all lease contract management, IFRS 16 accounting, and ROU asset processing.
+- RE-FX may be installed in the system but is NOT used as a runtime system by the addon (exception: one-time migration read-out if client has existing RE-FX contracts).
+- **FI-AA (Asset Accounting)** is the ROU asset management system — the addon creates/manages ROU assets via standard FI-AA BAPIs directly.
+- **FI-GL (New GL)** is active — the addon posts all lease accounting documents directly via standard FI BAPIs/FMs.
+- Document splitting in New GL may apply — confirm with FI team at T0-04 workshop.
 - The system runs on Unicode with support for ABAP 7.4 or higher — syntax and OO features aligned accordingly.
 - Transport system (CTS) is active; all Z objects must be assigned to proper transport requests and packages.
+- No RE-FX BAPIs are used. All SAP standard integration is via FI-GL BAPIs, FI-AA BAPIs, and standard SAP service interfaces.
 
 ---
 
@@ -21,9 +26,10 @@ The addon must be **S/4HANA migration-aware** even though the execution target i
 
 - Avoid usage of obsolete or deprecated ABAP statements (no `MOVE`, `COMPUTE`, classic `SELECT *` without explicit field lists).
 - Prefer ABAP CDS views over direct table reads for reporting and data extraction where feasible.
-- Z-table structures must not duplicate data that S/4HANA RE-FX (RECN* tables) would manage differently — leave migration path open.
+- Under Option B, Z tables are self-owned — there is no dependency on RE-FX table structures that may change in S/4. This makes Option B inherently more S/4-compatible than Option A.
 - Document every ECC-specific assumption with a flag: `[ECC-SPECIFIC: Review for S/4 migration]`.
 - Do not create ALV-only UIs without noting the Fiori alternative for S/4 — even if Fiori is not built for v1.
+- FI-GL and FI-AA BAPI wrappers must be behind interface classes to allow S/4 API substitution without changing business logic.
 
 ---
 
