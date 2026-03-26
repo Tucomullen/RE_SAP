@@ -12,12 +12,14 @@ inclusion: always
 
 ## Auto-Commit Hook
 
-The `auto-commit-push` hook fires on every `agentStop` event. It:
+The `auto-commit-push` hook fires on every `postTaskExecution` event — when a spec task is marked complete by the Orchestrator (step A7 of each pipeline). It:
 1. Stages all changes (`git add -A`)
 2. Commits only if there are staged changes (skips empty commits)
 3. Pushes to the current branch on `origin`
 
 Commit message format: `chore(auto): agent session commit <ISO timestamp>`
+
+This means a commit+push happens at the end of each Orchestrator iteration, not at session close.
 
 ## Manual Push
 
