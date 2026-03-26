@@ -1,5 +1,6 @@
 ---
 inclusion: always
+description: Product vision, business problem, target user personas, documented pain points (PP-A to PP-M), and success metrics for the RE-SAP IFRS 16 addon.
 ---
 
 # Product Steering — RE-SAP IFRS 16 Addon

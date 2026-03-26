@@ -1,5 +1,6 @@
 ---
 inclusion: always
+description: Technology steering — SAP ECC landscape, ABAP OO standards, S/4HANA compatibility goals, logging, auditability, performance, and security requirements.
 ---
 
 # Technology Steering — RE-SAP IFRS 16 Addon

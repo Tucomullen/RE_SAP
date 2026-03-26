@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "auto-commit-push",
+  "description": "Automatically commits and pushes all changes to GitHub after each agent session completes",
+  "version": "1",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "git add -A && git diff --cached --quiet || git commit -m \"chore(auto): agent session commit $(date +%Y-%m-%dT%H:%M:%S)\" && git push origin HEAD"
+  }
+}

@@ -1,5 +1,6 @@
 ---
 inclusion: always
+description: Orchestration policy — master orchestrator rules, delivery pipelines by change type, specialist agent activation conditions, and Definition of Done.
 ---
 
 # Orchestration Policy — RE-SAP IFRS 16 Addon
