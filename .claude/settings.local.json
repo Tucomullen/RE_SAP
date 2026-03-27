@@ -36,7 +36,17 @@
       "Bash(pdftotext -enc UTF-8 \"c:\\\\Users\\\\xlgarcia\\\\projects\\\\RE_SAP\\\\knowledge\\\\currently-design\\\\D05_Acciona_DF_Reclasificación de LP a CP_v1.7.pdf\" -)",
       "Bash(pdftotext -enc UTF-8 \"c:\\\\Users\\\\xlgarcia\\\\projects\\\\RE_SAP\\\\knowledge\\\\currently-design\\\\DF_IFRS16_Generación automática del contrato+SCTASK1418091_modif_lógica_exp_RE_v3.pdf\" -)",
       "Bash(find /c/Users/xlgarcia/projects/RE_SAP -type f -name *.md -o -name *.kiro*)",
-      "Bash(grep -E \"\\\\.\\(md|json\\)$\")"
+      "Bash(grep -E \"\\\\.\\(md|json\\)$\")",
+      "Read(//c/Users/xlgarcia/.kiro/settings/**)",
+      "Read(//c/Users/xlgarcia/**)",
+      "Bash(CLOUDSDK_PYTHON=\"$LOCALAPPDATA/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth application-default print-access-token)",
+      "Read(//c/Users/xlgarcia/projects/RE_SAP/$LOCALAPPDATA/Google/Cloud SDK/google-cloud-sdk/**)",
+      "Read(//c/Users/xlgarcia/projects/RE_SAP/$LOCALAPPDATA/**)",
+      "Bash(head -10 echo --- ls C:/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python3*)",
+      "Bash(ls \"C:/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python\"*)",
+      "Bash(CLOUDSDK_PYTHON=\"C:/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth application-default print-access-token)",
+      "Bash(echo \"EXIT: $?\")",
+      "Read(//c/Users/xlgarcia/projects/RE_SAP/$LOCALAPPDATA/Google/**)"
     ]
   }
 }
