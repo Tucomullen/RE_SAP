@@ -38,7 +38,8 @@
       "Bash(find /c/Users/xlgarcia/projects/RE_SAP -type f -name *.md -o -name *.kiro*)",
       "Bash(grep -E \"\\\\.\\(md|json\\)$\")",
       "Read(//c/Users/xlgarcia/.kiro/settings/**)",
-      "Read(//c/Users/xlgarcia/**)"
+      "Read(//c/Users/xlgarcia/**)",
+      "Bash(CLOUDSDK_PYTHON=\"$LOCALAPPDATA/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth application-default print-access-token)"
     ]
   }
 }
