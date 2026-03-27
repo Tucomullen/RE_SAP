@@ -6,6 +6,7 @@ This log records all significant architectural, functional, and governance decis
 |---------|------|--------|---------|
 | 0.1 | 2026-03-24 | Bootstrap | Initial decision log — first 5 ADRs proposed |
 | 0.2 | 2026-03-26 | Project Governance Lead | Added ADR-006 (Option B — ACCEPTED); added Critical Path Dependencies section; updated index |
+| 0.3 | 2026-03-27 | Orchestrator | ADR-001 to ADR-005 expanded to full format in `docs/governance/adrs/`; ready for Project Governance Lead approval |
 
 ---
 
@@ -14,11 +15,13 @@ This log records all significant architectural, functional, and governance decis
 | ADR | Date | Status | Title | Area |
 |-----|------|--------|-------|------|
 | ADR-006 | 2026-03-26 | **ACCEPTED** | Option B — Z addon fully replaces SAP RE-FX as system of record | Architecture |
-| ADR-001 | 2026-03-24 | Proposed | ABAP OO mandate for all Z development | Technical Architecture |
-| ADR-002 | 2026-03-24 | Proposed | Z object naming convention adoption | Development Standards |
-| ADR-003 | 2026-03-24 | Proposed | Application logging via SAP SLG1 + Z audit table | Auditability |
-| ADR-004 | 2026-03-24 | Proposed | Human approval gate mandatory before FI posting | Governance/Controls |
-| ADR-005 | 2026-03-24 | Proposed | S/4HANA compatibility by design — no deprecated ABAP | Technical Architecture |
+| ADR-001 | 2026-03-24 | **Proposed — Ready for Approval** | ABAP OO mandate for all Z development | Technical Architecture |
+| ADR-002 | 2026-03-24 | **Proposed — Ready for Approval** | Z object naming convention adoption | Development Standards |
+| ADR-003 | 2026-03-24 | **Proposed — Ready for Approval** | Application logging via SAP SLG1 + Z audit table | Auditability |
+| ADR-004 | 2026-03-24 | **Proposed — Ready for Approval** | Human approval gate mandatory before FI posting | Governance/Controls |
+| ADR-005 | 2026-03-24 | **Proposed — Ready for Approval** | S/4HANA compatibility by design — no deprecated ABAP | Technical Architecture |
+
+> **Acción requerida (Project Governance Lead):** Los ADR-001 a ADR-005 están en formato completo en `docs/governance/adrs/`. Revisar y firmar antes del inicio de Phase 1. Ver dependencia D-PHASE-02.
 
 > **ADR-006 is ACCEPTED and immediately effective.** It overrides any prior design assumption about RE-FX as system of record.
 > ADR-001 through ADR-005 are still **Proposed**. They require Project Governance Lead review. Create full ADR files in `knowledge/project-decisions/` when approved.
