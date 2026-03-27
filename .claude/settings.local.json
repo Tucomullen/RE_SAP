@@ -39,7 +39,12 @@
       "Bash(grep -E \"\\\\.\\(md|json\\)$\")",
       "Read(//c/Users/xlgarcia/.kiro/settings/**)",
       "Read(//c/Users/xlgarcia/**)",
-      "Bash(CLOUDSDK_PYTHON=\"$LOCALAPPDATA/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth application-default print-access-token)"
+      "Bash(CLOUDSDK_PYTHON=\"$LOCALAPPDATA/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth application-default print-access-token)",
+      "Read(//c/Users/xlgarcia/projects/RE_SAP/$LOCALAPPDATA/Google/Cloud SDK/google-cloud-sdk/**)",
+      "Read(//c/Users/xlgarcia/projects/RE_SAP/$LOCALAPPDATA/**)",
+      "Bash(head -10 echo --- ls C:/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python3*)",
+      "Bash(ls \"C:/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python\"*)",
+      "Bash(CLOUDSDK_PYTHON=\"C:/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth application-default print-access-token)"
     ]
   }
 }
