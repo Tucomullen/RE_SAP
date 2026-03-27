@@ -46,7 +46,9 @@
       "Bash(ls \"C:/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python\"*)",
       "Bash(CLOUDSDK_PYTHON=\"C:/Users/xlgarcia/AppData/Local/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth application-default print-access-token)",
       "Bash(echo \"EXIT: $?\")",
-      "Read(//c/Users/xlgarcia/projects/RE_SAP/$LOCALAPPDATA/Google/**)"
+      "Read(//c/Users/xlgarcia/projects/RE_SAP/$LOCALAPPDATA/Google/**)",
+      "Bash(CLOUDSDK_PYTHON=\"$LOCALAPPDATA/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth application-default login)",
+      "Bash(CLOUDSDK_PYTHON=\"$LOCALAPPDATA/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe\" gcloud auth application-default set-quota-project northern-syntax-483410-v6)"
     ]
   }
 }
