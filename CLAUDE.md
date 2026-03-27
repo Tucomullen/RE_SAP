@@ -473,5 +473,201 @@ Para usar un skill: `Skill tool → [nombre-skill]` o ejecutar el contenido de `
 
 ---
 
-*Traceability: `.kiro/agents/orchestrator-ifrs16.json` (migrado) | `AGENTS.md` | `.kiro/steering/*.md`*
-*Versión: 2.0 | Fecha: 2026-03-27 | Migrado a Claude Code por: Orchestrator*
+## STITCH MCP — DISEÑO DE PANTALLAS UI/UX
+
+### Estado del MCP
+El servidor MCP de Stitch está configurado en `~/.claude/settings.json` y se conecta vía proxy local:
+- **Proxy:** `tools/stitch-proxy.mjs` → `https://stitch.googleapis.com/mcp`
+- **Auth:** Google Cloud ADC (`gcloud auth application-default login`)
+- **Proyecto Stitch:** `re-sap-ifrs16` (ID: `8885202212425441682`)
+- **Estado validado:** 2026-03-25 — infraestructura operacional
+
+**Prerequisitos para usar el MCP:**
+```bash
+gcloud auth application-default login
+gcloud auth application-default set-quota-project northern-syntax-483410-v6
+# Si gcloud requiere Python en Windows:
+# CLOUDSDK_PYTHON="$LOCALAPPDATA/Google/Cloud SDK/google-cloud-sdk/platform/bundledpython/python.exe" gcloud <cmd>
+```
+
+### Herramientas MCP disponibles (Stitch)
+
+| Herramienta | Descripción |
+|-------------|-------------|
+| `create_project` | Crea un nuevo proyecto Stitch |
+| `get_project` | Recupera detalles de un proyecto |
+| `list_projects` | Lista todos los proyectos accesibles |
+| `list_screens` | Lista todas las pantallas de un proyecto |
+| `get_screen` | Recupera una pantalla específica |
+| `generate_screen_from_text` | **Genera una nueva pantalla desde un prompt de texto** |
+| `edit_screens` | Edita pantallas existentes vía prompt |
+| `generate_variants` | Genera variantes de pantallas existentes |
+| `create_design_system` | Crea un design system para el proyecto |
+| `update_design_system` | Actualiza el design system |
+| `list_design_systems` | Lista los design systems del proyecto |
+| `apply_design_system` | Aplica el design system a pantallas |
+
+### Flujo de trabajo Stitch → UI5
+
+```
+specs/ (verdad funcional)
+    ↓  Orchestrator / ux-stitch lee los requisitos
+design/stitch/prompts/  (prompts — solo trazabilidad)
+    ↓  [Workflow A] Prompt pegado manualmente en Stitch web UI
+    ↓  [Workflow B — MCP] generate_screen_from_text vía MCP
+Google Stitch (generación de pantalla)
+    ↓  Pantalla generada → exportada como HTML + screenshot + JSON
+design/stitch/exports/<screen-name>/
+    ↓  screen.html  ← FUENTE PRINCIPAL para ui5-fiori-bridge
+    ↓  screenshot.png  ← validación visual
+    ↓  metadata.json / screen.json  ← contexto estructural
+    ↓  source-prompt.md  ← solo trazabilidad
+    ↓  traceability.md  ← links a specs, pain points
+    ↓  ux-stitch revisa contra SAP constraints + pain points
+    ↓  ui5-fiori-bridge traduce HTML → SAP UI5 spec (XML View, controller)
+design/stitch/screens/  (revisados y anotados)
+    ↓  Validado por representante de persona
+knowledge/ux-stitch/  (artefactos validados — autoritativos)
+```
+
+**Precedencia de fuentes (para implementación UI5):**
+1. `screen.html` — **FUENTE PRINCIPAL** — layout, jerarquía, componentes, acciones
+2. `screenshot.png` — validación visual
+3. `metadata.json` / `screen.json` — contexto estructural
+4. `source-prompt.md` — solo trazabilidad (no rediseñar desde aquí si HTML existe)
+
+**Regla crítica:** Si `screen.html` existe con contenido real → `ui5-fiori-bridge` trabaja desde él, no desde el prompt. NO inventar artefactos — si Stitch no ha generado la pantalla, los archivos son placeholders documentados.
+
+### SKILL: Diseño de Pantallas para Stitch (tools/skill_stitch.md)
+
+Antes de generar cualquier prompt para Stitch, aplicar estas directrices de diseño. Son obligatorias.
+
+#### Paso 1 — Diseño Thinking (antes de escribir el prompt)
+
+Definir y comprometerse con una **dirección estética BOLD** para cada pantalla:
+- **Propósito:** ¿Qué problema resuelve esta interfaz? ¿Quién la usa? (Finance user, Lease Accountant, Controller, Auditor)
+- **Tono:** Elegir un extremo: brutalmente minimal / editorial / luxury-refined / industrial-utilitarian. Para SAP IFRS 16: **clarity-first, data-dense, professional** — NO consumer-friendly ni decorativo.
+- **Diferenciación:** ¿Qué hace que esta pantalla sea MEMORABLE y funcionalmente superior a la RE-FX que reemplaza?
+
+#### Paso 2 — Constrainsts SAP (del Design Contract `design/stitch/DESIGN.md`)
+
+| Principio | Regla |
+|-----------|-------|
+| Claridad sobre estilo | Sin gradientes decorativos, sombras ni animaciones. Cada elemento visual lleva información o estructura |
+| Densidad es un feature | Los usuarios de finance trabajan con datos densos. No espaciar contenido que requiera scroll excesivo |
+| Estado siempre visible | Cada fila de lista y header de contrato muestra su estado sin drill-down |
+| Solo errores accionables | Cada warning incluye el path de resolución específico, no solo la descripción del problema |
+| Fiori-oriented, ECC-realistic | Diseñar con SAP Fiori Design System. Marcar patrones que requieran Fiori/UI5 y no sean implementables en ECC WebDynpro con `[Fiori-ready — ECC alternative needed]` |
+
+#### Paso 3 — Estructura de layout SAP
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Page Title + Context (Company Code, Fiscal Year)   │
+├─────────────────────────────────────────────────────┤
+│  Filter / Selection Bar (collapsible)               │
+├─────────────────────────────────────────────────────┤
+│  Main Content Area                                  │
+│  (Table / Form / Wizard / Dashboard tiles)          │
+├─────────────────────────────────────────────────────┤
+│  Action Bar (primary actions right-aligned)         │
+└─────────────────────────────────────────────────────┘
+```
+
+- Grid: 12 columnas para formularios
+- Campos de formulario: 4 o 6 columnas (fechas = 3, importes = 4, descripciones = 6-12)
+- Tablas: ancho completo, sin scroll horizontal salvo que el contenido lo requiera genuinamente
+- Máximo 2 niveles de contenedores anidados
+
+#### Paso 4 — Tipografía, Color y Estética (frontend-design skill)
+
+**Tipografía:**
+- Elegir fuentes ÚNICAS e INTERESANTES. NUNCA: Arial, Inter, Roboto, system fonts como elección primaria.
+- Para SAP IFRS 16: preferir fuentes con carácter profesional/editorial. Combinar una fuente display distintiva con una body refinada.
+
+**Color:**
+- Comprometerse con una paleta cohesiva. CSS variables para consistencia.
+- Colores dominantes con acentos precisos > paletas tímidas distribuidas uniformemente.
+- NUNCA: gradientes púrpura sobre fondo blanco (cliché AI más común).
+
+**Motion:**
+- Solo para micro-interactions con información (estados de error, confirmaciones, transiciones de pantalla).
+- Un reveal orquestado al cargar > múltiples micro-interactions dispersas.
+- Para SAP/Finance: **motion mínimo y funcional** — no decorativo.
+
+**Composición espacial:**
+- Layouts inesperados. Asimetría controlada. Elementos que rompen la grilla de forma intencional.
+- Para SAP: densidad controlada con jerarquía visual clara.
+
+**Fondos y detalles visuales:**
+- Crear atmósfera y profundidad, no defaultear a colores sólidos planos.
+- Para IFRS 16 / Finance: fondos sutiles que comuniquen precisión y confianza.
+
+#### Paso 5 — LO QUE NUNCA HACER en prompts Stitch para este proyecto
+
+```
+NUNCA generar estéticas AI-genéricas:
+- Fuentes sobreusadas: Inter, Roboto, Arial, Space Grotesk como elección primaria
+- Esquemas de color predecibles: gradientes púrpura sobre blanco, paletas enterprise azul/gris genérico
+- Layouts predecibles: card grids estándar, hero sections genéricas
+- Patrones que no son específicos del contexto SAP finance
+```
+
+#### Paso 6 — Pantallas actuales y estado
+
+| Pantalla | Carpeta export | Estado | Prompt |
+|---------|---------------|--------|--------|
+| Lease Contract Overview | `design/stitch/exports/lease-contract-overview/` | ⬜ Placeholder — export pendiente | `design/stitch/prompts/lease-contract-overview.md` |
+| Finance Dashboard | `design/stitch/exports/` (legacy `.md`) | ⬜ Legacy — no migrado al nuevo estándar | `exports/finance-dashboard-v0.1-2026-03-25.md` |
+
+**Próximas pantallas a generar (por prioridad):**
+1. Contract Intake Wizard (CD-01)
+2. Period-End Trigger / Batch Dashboard (CD-04)
+3. Calculation Approval Screen (CD-03 + gate ADR-004)
+4. Reclassification Run (CD-08)
+5. Rollforward Report (CD-09)
+
+### Cómo usar Stitch desde Claude Code
+
+**Workflow B — Via MCP (preferido cuando ADC está activo):**
+```
+1. Verificar que el MCP stitch está Connected (aparece en la lista de herramientas disponibles)
+2. Clasificar la solicitud: Pipeline C (UI/UX Change) o A4/A5 en Pipeline A (New Feature)
+3. Generar el prompt siguiendo los pasos 1-5 de la skill anterior
+4. Llamar: stitch.generate_screen_from_text(project_id="8885202212425441682", prompt="...")
+5. Recuperar: stitch.get_screen(project_id="...", screen_id="...")
+6. Guardar screen.html + screenshot.png + metadata.json en design/stitch/exports/<screen-name>/
+7. Crear source-prompt.md (trazabilidad) y traceability.md (links a specs y pain points)
+8. Activar ui5-fiori-bridge con la ruta a screen.html
+```
+
+**Workflow A — Manual (cuando ADC no está activo):**
+```
+1. Generar el prompt y guardarlo en design/stitch/prompts/<screen-name>.md
+2. Indicar al usuario que lo pegue manualmente en Stitch web UI
+3. Indicar al usuario que exporte y guarde en design/stitch/exports/<screen-name>/
+4. Una vez que screen.html existe, activar ui5-fiori-bridge
+```
+
+**Limitación importante:** Si ADC no está activo (`gcloud auth application-default login` no ejecutado), el MCP falla en `tools/call`. Usar Workflow A como fallback. Ver `design/stitch/README.md` sección 2.
+
+---
+
+## REFERENCIA MCP COMPLETA (~/.claude/settings.json)
+
+```json
+{
+  "mcpServers": {
+    "stitch": {
+      "command": "node",
+      "args": ["c:/Users/xlgarcia/projects/RE_SAP/tools/stitch-proxy.mjs"],
+      "cwd": "c:/Users/xlgarcia/projects/RE_SAP"
+    }
+  }
+}
+```
+
+---
+
+*Traceability: `.kiro/agents/orchestrator-ifrs16.json` (migrado) | `AGENTS.md` | `.kiro/steering/*.md` | `.kiro/settings/mcp.json` (migrado) | `tools/skill_stitch.md` | `design/stitch/DESIGN.md` | `design/stitch/README.md`*
+*Versión: 2.1 | Fecha: 2026-03-27 | Migrado a Claude Code por: Orchestrator*
