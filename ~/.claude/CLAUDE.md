@@ -180,3 +180,23 @@ truly discrete items or the user explicitly requests a list. Incorporate items n
 into sentences instead.
 </avoid_excessive_markdown>
 ```
+
+---
+
+## 11. Global MCP Configuration — Stitch
+
+**Status:** Configured globally at `~/.kiro/settings/mcp.json` (2026-03-27)
+
+Stitch MCP is now available in all Kiro projects without per-workspace configuration. The global configuration includes:
+
+- **Server:** `stitch` (node-based proxy via `tools/stitch-proxy.mjs`)
+- **Status:** Enabled (`disabled: false`)
+- **Auto-approved tools:** Read-only operations (list projects, get project, list screens, get screen)
+- **Scope:** All workspaces inherit this configuration
+
+To use Stitch MCP in any project:
+1. Ensure the workspace has `tools/stitch-proxy.mjs` (or symlink to a shared location)
+2. Run `gcloud auth application-default login` once to set up ADC (Application Default Credentials)
+3. Stitch MCP tools are immediately available in agent prompts
+
+**Note:** Write operations (generate screen, edit screen, apply design system) still require explicit approval per invocation — they are not auto-approved for safety.

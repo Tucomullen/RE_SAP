@@ -5,6 +5,7 @@
 **Related files:** `design/stitch/DESIGN.md`, `.kiro/agents/ux-stitch.json`, `.kiro/agents/ui5-fiori-bridge.json`, `knowledge/ux-stitch/README.md`
 
 > **Connection status:** MCP infrastructure **validated and registered** as of 2026-03-25.
+> **Global MCP config:** Stitch MCP configured globally at `~/.kiro/settings/mcp.json` (2026-03-27) — available in all projects.
 > Auth: Google Cloud ADC via `tools/stitch-proxy.mjs` (forwarding proxy, `google-auth-library`).
 > Workflow A (manual) is fully operational.
 > Workflow B (MCP via Kiro) requires completing ADC authentication setup (see section 2).
