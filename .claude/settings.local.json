@@ -36,7 +36,9 @@
       "Bash(pdftotext -enc UTF-8 \"c:\\\\Users\\\\xlgarcia\\\\projects\\\\RE_SAP\\\\knowledge\\\\currently-design\\\\D05_Acciona_DF_Reclasificación de LP a CP_v1.7.pdf\" -)",
       "Bash(pdftotext -enc UTF-8 \"c:\\\\Users\\\\xlgarcia\\\\projects\\\\RE_SAP\\\\knowledge\\\\currently-design\\\\DF_IFRS16_Generación automática del contrato+SCTASK1418091_modif_lógica_exp_RE_v3.pdf\" -)",
       "Bash(find /c/Users/xlgarcia/projects/RE_SAP -type f -name *.md -o -name *.kiro*)",
-      "Bash(grep -E \"\\\\.\\(md|json\\)$\")"
+      "Bash(grep -E \"\\\\.\\(md|json\\)$\")",
+      "Read(//c/Users/xlgarcia/.kiro/settings/**)",
+      "Read(//c/Users/xlgarcia/**)"
     ]
   }
 }
